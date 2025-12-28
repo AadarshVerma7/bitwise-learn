@@ -73,10 +73,8 @@ app.get("/health", async (req, res) => {
 
 declare global {
   namespace Express {
-    interface User {
-      id: string;
-      email?: string;
-      role?: string;
+    interface Request {
+      user?: { id: string };
     }
   }
 }

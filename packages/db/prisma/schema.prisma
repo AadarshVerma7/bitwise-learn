@@ -147,13 +147,13 @@ model Students {
 
 model Course {
   id                String             @id @default(auto()) @map("_id") @db.ObjectId
-  name              String
+  name              String             @unique
   description       String
   level             COURSE_LEVEL       @default(BASIC)
-  Duration          String
-  thumbnail         String
+  duration          String?
+  thumbnail         String?
   instructorName    String
-  certificate       String
+  certificate       String?
   isPublished       COURSE_STATUS      @default(NOT_PUBLISHED)
   createdBy         String             @db.ObjectId
   creator           User               @relation(fields: [createdBy], references: [id])
@@ -180,14 +180,14 @@ model CourseSections {
 model CourseLearningContent {
   id               String           @id @default(auto()) @map("_id") @db.ObjectId
   name             String
-  description      String
+  description      String?
   creatorId        String           @db.ObjectId
   creator          User             @relation(references: [id], fields: [creatorId])
   sectionId        String           @db.ObjectId
   section          CourseSections   @relation(references: [id], fields: [sectionId])
   videoUrl         String
-  transcript       String
-  file             String
+  transcript       String?
+  file             String?
   courseProgresses CourseProgress[]
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
