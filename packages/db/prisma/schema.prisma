@@ -5,3 +5,410 @@ generator client {
 datasource db {
   provider = "mongodb"
 }
+
+enum COURSE_STATUS {
+  PUBLISHED
+  NOT_PUBLISHED
+}
+
+enum COURSE_LEVEL {
+  BASIC
+  INTERMEDIATE
+  ADVANCE
+}
+
+enum ASSIGNMENT_TYPE {
+  MCQ
+  SCQ
+}
+
+enum PROBLEM_STATUS {
+  SUCCESS
+  FAILED
+}
+
+enum TESTCASE_TYPE {
+  EXAMPLE
+  HIDDEN
+}
+
+enum ASSESSMENT_TYPE {
+  CODE
+  NO_CODE
+}
+
+enum ASSESSMENT_STATUS {
+  UPCOMING
+  LIVE
+  ENDED
+}
+
+model User {
+  id                     String                  @id @default(auto()) @map("_id") @db.ObjectId
+  name                   String
+  email                  String
+  password               String
+  ROLE                   String                  @default("SUPERADMIN")
+  institutions           Institution[]
+  courseSections         CourseSections[]
+  courseLearningContents CourseLearningContent[]
+  courses                Course[]
+  problems               Problem[]
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime                @updatedAt
+}
+
+model Institution {
+  id                   String             @id @default(auto()) @map("_id") @db.ObjectId
+  name                 String
+  address              String
+  pinCode              String
+  tagline              String
+  websiteLink          String
+  loginPassword        String
+  email                String             @unique
+  secondaryEmail       String?            @unique
+  phoneNumber          String             @unique
+  secondaryPhoneNumber String?            @unique
+  createdBy            String             @db.ObjectId
+  creator              User               @relation(references: [id], fields: [createdBy])
+  vendors              Vendor[]
+  batches              Batch[]
+  teachers             Teacher[]
+  students             Students[]
+  courseEnrollments    CourseEnrollment[]
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+}
+
+model Vendor {
+  id                   String      @id @default(auto()) @map("_id") @db.ObjectId
+  name                 String
+  email                String
+  secondaryEmail       String
+  tagline              String
+  phoneNumber          String
+  secondaryPhoneNumber String
+  websiteLink          String
+  loginPassword        String
+  institutionId        String      @db.ObjectId
+  creator              Institution @relation(references: [id], fields: [institutionId])
+  createdAt            DateTime    @default(now())
+  updatedAt            DateTime    @updatedAt
+}
+
+model Batch {
+  id            String       @id @default(auto()) @map("_id") @db.ObjectId
+  batchname     String
+  branch        String
+  batchEndYear  String
+  institutionId String       @db.ObjectId
+  insitution    Institution  @relation(references: [id], fields: [institutionId])
+  teachers      Teacher[]
+  students      Students[]
+  assessments   Assessment[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+}
+
+model Teacher {
+  id            String       @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  email         String
+  phoneNumber   String
+  loginPassword String
+  vendorId      String
+  instituteId   String       @db.ObjectId
+  insitution    Institution  @relation(references: [id], fields: [instituteId])
+  batchId       String       @db.ObjectId
+  batch         Batch        @relation(references: [id], fields: [batchId])
+  assessments   Assessment[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+}
+
+model Students {
+  id                          String                       @id @default(auto()) @map("_id") @db.ObjectId
+  name                        String
+  rollNumber                  String                       @unique
+  email                       String                       @unique
+  loginPassword               String
+  batchId                     String                       @db.ObjectId
+  batch                       Batch                        @relation(references: [id], fields: [batchId])
+  instituteId                 String                       @db.ObjectId
+  insitution                  Institution                  @relation(references: [id], fields: [instituteId])
+  courseProgresses            CourseProgress[]
+  courseAssignemntSubmissions CourseAssignemntSubmission[]
+  problemSubmissions          ProblemSubmission[]
+  assessmentSubmissions       AssessmentSubmission[]
+  createdAt                   DateTime                     @default(now())
+  updatedAt                   DateTime                     @updatedAt
+}
+
+model Course {
+  id                String             @id @default(auto()) @map("_id") @db.ObjectId
+  name              String
+  description       String
+  level             COURSE_LEVEL       @default(BASIC)
+  Duration          String
+  thumbnail         String
+  instructorName    String
+  certificate       String
+  isPublished       COURSE_STATUS      @default(NOT_PUBLISHED)
+  createdBy         String             @db.ObjectId
+  creator           User               @relation(fields: [createdBy], references: [id])
+  courseSections    CourseSections[]
+  courseEnrollments CourseEnrollment[]
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+}
+
+model CourseSections {
+  id                     String                  @id @default(auto()) @map("_id") @db.ObjectId
+  name                   String
+  creatorId              String                  @db.ObjectId
+  creator                User                    @relation(references: [id], fields: [creatorId])
+  courseId               String                  @db.ObjectId
+  course                 Course                  @relation(references: [id], fields: [courseId])
+  courseLearningContents CourseLearningContent[]
+  courseAssignemnts      CourseAssignemnt[]
+  problems               Problem[]
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime                @updatedAt
+}
+
+model CourseLearningContent {
+  id               String           @id @default(auto()) @map("_id") @db.ObjectId
+  name             String
+  description      String
+  creatorId        String           @db.ObjectId
+  creator          User             @relation(references: [id], fields: [creatorId])
+  sectionId        String           @db.ObjectId
+  section          CourseSections   @relation(references: [id], fields: [sectionId])
+  videoUrl         String
+  transcript       String
+  file             String
+  courseProgresses CourseProgress[]
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+}
+
+model CourseProgress {
+  id        String                @id @default(auto()) @map("_id") @db.ObjectId
+  studentId String                @db.ObjectId
+  student   Students              @relation(references: [id], fields: [studentId])
+  contentId String                @db.ObjectId
+  content   CourseLearningContent @relation(references: [id], fields: [contentId])
+  createdAt DateTime              @default(now())
+  updatedAt DateTime              @updatedAt
+
+  @@unique([studentId, contentId])
+}
+
+model CourseAssignemnt {
+  id                        String                     @id @default(auto()) @map("_id") @db.ObjectId
+  name                      String
+  description               String
+  instrution                String
+  marksPerQuestion          String
+  sectionId                 String                     @db.ObjectId
+  section                   CourseSections             @relation(fields: [sectionId], references: [id])
+  courseAssignemntQuestions CourseAssignemntQuestion[]
+  createdAt                 DateTime                   @default(now())
+  updatedAt                 DateTime                   @updatedAt
+}
+
+model CourseAssignemntQuestion {
+  id                          String                       @id @default(auto()) @map("_id") @db.ObjectId
+  question                    String
+  options                     String[]
+  correctAnswer               String[]
+  assignmentId                String                       @db.ObjectId
+  assignment                  CourseAssignemnt             @relation(fields: [assignmentId], references: [id])
+  type                        ASSIGNMENT_TYPE              @default(SCQ)
+  courseAssignemntSubmissions CourseAssignemntSubmission[]
+  createdAt                   DateTime                     @default(now())
+  updatedAt                   DateTime                     @updatedAt
+}
+
+model CourseAssignemntSubmission {
+  id            String                   @id @default(auto()) @map("_id") @db.ObjectId
+  questionId    String                   @db.ObjectId
+  question      CourseAssignemntQuestion @relation(references: [id], fields: [questionId])
+  studentId     String                   @db.ObjectId
+  student       Students                 @relation(fields: [studentId], references: [id])
+  answer        String[]
+  marksObtained Int?
+  isCorrect     Boolean?
+  submittedAt   DateTime                 @default(now())
+  createdAt     DateTime                 @default(now())
+  updatedAt     DateTime                 @updatedAt
+}
+
+model CourseEnrollment {
+  id          String      @id @default(auto()) @map("_id") @db.ObjectId
+  courseId    String      @db.ObjectId
+  course      Course      @relation(fields: [courseId], references: [id])
+  instituteId String      @db.ObjectId
+  institute   Institution @relation(fields: [instituteId], references: [id])
+  enrolledAt  DateTime    @default(now())
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@unique([courseId, instituteId])
+}
+
+model Problem {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  name         String
+  description  String
+  hints        String[]
+  time         Int
+  mainFunction String
+  createdBy    String   @db.ObjectId
+  creator      User     @relation(fields: [createdBy], references: [id])
+
+  sectionId String?         @db.ObjectId
+  section   CourseSections? @relation(fields: [sectionId], references: [id])
+
+  testCases           ProblemTestCase[]
+  submissions         ProblemSubmission[]
+  solution            ProblemSolution?
+  assessmentQuestions AssessmentQuestion[]
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+}
+
+model ProblemTestCase {
+  id       String        @id @default(auto()) @map("_id") @db.ObjectId
+  testType TESTCASE_TYPE
+  input    String
+  output   String
+
+  problemId String   @db.ObjectId
+  problem   Problem  @relation(fields: [problemId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ProblemSolution {
+  id            String  @id @default(auto()) @map("_id") @db.ObjectId
+  solution      String
+  videoSolution String?
+
+  problemId String   @unique @db.ObjectId
+  problem   Problem  @relation(fields: [problemId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ProblemSubmission {
+  id      String         @id @default(auto()) @map("_id") @db.ObjectId
+  code    String
+  runtime String?
+  memory  String?
+  status  PROBLEM_STATUS
+
+  studentId String   @db.ObjectId
+  student   Students @relation(fields: [studentId], references: [id])
+
+  problemId String  @db.ObjectId
+  problem   Problem @relation(fields: [problemId], references: [id])
+
+  submittedAt DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Assessment {
+  id                         String            @id @default(auto()) @map("_id") @db.ObjectId
+  name                       String
+  description                String
+  instruction                String
+  startTime                  DateTime
+  endTime                    DateTime
+  individualSectionTimeLimit Int?
+  status                     ASSESSMENT_STATUS @default(UPCOMING)
+
+  instructorId String  @db.ObjectId
+  instructor   Teacher @relation(fields: [instructorId], references: [id])
+
+  batchId String @db.ObjectId
+  batch   Batch  @relation(fields: [batchId], references: [id])
+
+  sections    AssessmentSection[]
+  submissions AssessmentSubmission[]
+  createdAt   DateTime               @default(now())
+  updatedAt   DateTime               @updatedAt
+}
+
+model AssessmentSection {
+  id               String          @id @default(auto()) @map("_id") @db.ObjectId
+  name             String
+  description      String
+  instruction      String
+  startTime        DateTime?
+  endTime          DateTime?
+  marksPerQuestion Int
+  assessmentType   ASSESSMENT_TYPE
+
+  assessmentId String     @db.ObjectId
+  assessment   Assessment @relation(fields: [assessmentId], references: [id])
+
+  questions AssessmentQuestion[]
+  createdAt DateTime             @default(now())
+  updatedAt DateTime             @updatedAt
+}
+
+model AssessmentQuestion {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  description String
+
+  sectionId String            @db.ObjectId
+  section   AssessmentSection @relation(fields: [sectionId], references: [id])
+
+  problemId String?  @db.ObjectId
+  problem   Problem? @relation(fields: [problemId], references: [id])
+
+  maxMarks                      Int
+  order                         Int
+  assessmentQuestionSubmissions AssessmentQuestionSubmission[]
+  createdAt                     DateTime                       @default(now())
+  updatedAt                     DateTime                       @updatedAt
+}
+
+model AssessmentSubmission {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  assessmentId String     @db.ObjectId
+  assessment   Assessment @relation(fields: [assessmentId], references: [id])
+
+  studentId String   @db.ObjectId
+  student   Students @relation(fields: [studentId], references: [id])
+
+  startedAt                     DateTime                       @default(now())
+  submittedAt                   DateTime?
+  totalMarks                    Int?
+  isSubmitted                   Boolean                        @default(false)
+  assessmentQuestionSubmissions AssessmentQuestionSubmission[]
+  createdAt                     DateTime                       @default(now())
+  updatedAt                     DateTime                       @updatedAt
+
+  @@unique([assessmentId, studentId])
+}
+
+model AssessmentQuestionSubmission {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  questionId String             @db.ObjectId
+  question   AssessmentQuestion @relation(fields: [questionId], references: [id])
+
+  submissionId String               @db.ObjectId
+  submission   AssessmentSubmission @relation(fields: [submissionId], references: [id])
+
+  answer        String?
+  marksObtained Int?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
