@@ -99,6 +99,7 @@ export interface GradesBody {
   questionId: string;
   answer: string[];
 }
+<<<<<<< Updated upstream
 
 export interface CreateTeacherBody {
   name: string;
@@ -117,4 +118,52 @@ export interface UpdateTeacherBody {
   loginPassword?: string;
   batchId?: string;
   vendorId?: string;
+=======
+export interface DSAQuestionBody {
+  name: string;
+  description: string;
+  hints: string[];
+  mainFunction: string;
+}
+
+export interface ProblemBody {
+  name: string;
+  description: string;
+  hints?: string[];
+}
+
+export interface UpdateProblemBody {
+  description?: string;
+  hints?: string[];
+}
+
+export interface ProblemTemplate {
+  functionBody: string;
+  defaultCode: string;
+  language: string;
+}
+export interface UpdateProblemTemplate {
+  functionBody?: string;
+  defaultCode?: string;
+  language?: string;
+}
+export interface ProblemTestCaseBody {
+  input: string;
+  output: string;
+  testType: "EXAMPLE" | "HIDDEN";
+}
+export interface UpdatedProblemTestCaseBody {
+  input?: string;
+  output?: string;
+  testType?: "EXAMPLE" | "HIDDEN";
+}
+export interface ProblemSolution {
+  solution: string;
+  videoSolution: string;
+}
+export interface ProblemSubmission {
+  code: string;
+  runtime: string;
+  memory: string;
+>>>>>>> Stashed changes
 }

@@ -43,6 +43,14 @@ enum ASSESSMENT_STATUS {
   ENDED
 }
 
+enum LANGUAGES {
+  JS
+  JAVA
+  PYTHON
+  C
+  CPP
+}
+
 model User {
   id                     String                  @id @default(auto()) @map("_id") @db.ObjectId
   name                   String
@@ -143,6 +151,7 @@ model Students {
   assessmentSubmissions       AssessmentSubmission[]
   createdAt                   DateTime                     @default(now())
   updatedAt                   DateTime                     @updatedAt
+  problemTemplates            ProblemTemplate[]
 }
 
 model Course {
@@ -259,14 +268,12 @@ model CourseEnrollment {
 }
 
 model Problem {
-  id           String   @id @default(auto()) @map("_id") @db.ObjectId
-  name         String
-  description  String
-  hints        String[]
-  time         Int
-  mainFunction String
-  createdBy    String   @db.ObjectId
-  creator      User     @relation(fields: [createdBy], references: [id])
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  description String
+  hints       String[]
+  createdBy   String   @db.ObjectId
+  creator     User     @relation(fields: [createdBy], references: [id])
 
   sectionId String?         @db.ObjectId
   section   CourseSections? @relation(fields: [sectionId], references: [id])
@@ -275,31 +282,53 @@ model Problem {
   submissions         ProblemSubmission[]
   solution            ProblemSolution?
   assessmentQuestions AssessmentQuestion[]
+  problemTemplates    ProblemTemplate[]
+  problemTopics       ProblemTopic[]
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt
 }
 
-model ProblemTestCase {
-  id       String        @id @default(auto()) @map("_id") @db.ObjectId
-  testType TESTCASE_TYPE
-  input    String
-  output   String
-
+model ProblemTopic {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
   problemId String   @db.ObjectId
-  problem   Problem  @relation(fields: [problemId], references: [id])
+  problem   Problem  @relation(references: [id], fields: [problemId])
+  tagName   String[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
+model ProblemTemplate {
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
+  problemId    String    @db.ObjectId
+  problem      Problem   @relation(references: [id], fields: [problemId])
+  functionBody String
+  defaultCode  String
+  language     LANGUAGES
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  students     Students? @relation(fields: [studentsId], references: [id])
+  studentsId   String?   @db.ObjectId
+}
+
+model ProblemTestCase {
+  id        String        @id @default(auto()) @map("_id") @db.ObjectId
+  testType  TESTCASE_TYPE
+  input     String
+  output    String
+  problemId String        @db.ObjectId
+  problem   Problem       @relation(fields: [problemId], references: [id])
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+}
+
 model ProblemSolution {
-  id            String  @id @default(auto()) @map("_id") @db.ObjectId
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
   solution      String
   videoSolution String?
-
-  problemId String   @unique @db.ObjectId
-  problem   Problem  @relation(fields: [problemId], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  problemId     String   @unique @db.ObjectId
+  problem       Problem  @relation(fields: [problemId], references: [id])
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
 model ProblemSubmission {
