@@ -19,7 +19,7 @@ class TeacherController {
 
             if (!dbUser) throw new Error("no such user found!");
 
-            if (dbUser.ROLE !== "INSTITUTION" && dbUser.ROLE !== "VENDOR") {
+            if (req.user.type !== "INSTITUTION" && req.user.type !== "VENDOR") {
                 throw new Error("only institution or vendor can create teachers");
             }
 
@@ -84,7 +84,7 @@ class TeacherController {
             });
             if (!dbUser) throw new Error("no such user found");
 
-            if (dbUser.ROLE !== "INSTITUTION" && dbUser.ROLE !== "VENDOR") {
+            if (req.user.type !== "INSTITUTION" && req.user.type !== "VENDOR") {
                 throw new Error("only institution or vendor can update teachers");
             }
 
@@ -93,11 +93,12 @@ class TeacherController {
             });
             if (!teacher) throw new Error("teacher not found");
 
-            if (dbUser.ROLE === "INSTITUTION" && teacher.instituteId !== userId) {
+            // Check if teacher belongs to the institute
+            if (req.user.type === "INSTITUTION" && teacher.instituteId !== userId) {
                 throw new Error("not authorized");
             }
 
-            if (dbUser.ROLE === "VENDOR" && teacher.vendorId !== userId) {
+            else if (teacher.vendorId && req.user.type !== "VENDOR" && teacher.vendorId !== userId) {
                 throw new Error("not authorized");
             }
 
@@ -149,7 +150,7 @@ class TeacherController {
             });
             if (!dbUser) throw new Error("no such user found");
 
-            if (dbUser.ROLE !== "INSTITUTION" && dbUser.ROLE !== "VENDOR") {
+            if (req.user.type !== "INSTITUTION" && req.user.type !== "VENDOR") {
                 throw new Error("only institution or vendor can delete teachers");
             }
 
@@ -158,21 +159,22 @@ class TeacherController {
             });
             if (!teacher) throw new Error("teacher not found");
 
-            if (dbUser.ROLE === "INSTITUTION" && teacher.instituteId !== userId) {
+            if (req.user.type === "INSTITUTION" && teacher.instituteId !== userId) {
                 throw new Error("not authorized");
             }
 
-            if (dbUser.ROLE === "VENDOR" && teacher.vendorId !== userId) {
+            else if (teacher.vendorId && req.user.type !== "VENDOR" && teacher.vendorId !== userId) {
                 throw new Error("not authorized");
             }
 
-            await prismaClient.teacher.delete({
+            const deletedTeacher = await prismaClient.teacher.delete({
                 where: { id: teacherId },
             });
+            if (!deletedTeacher) throw new Error("Error deleting teacher");
 
             return res
                 .status(200)
-                .json(apiResponse(200, "teacher deleted successfully", teacher));
+                .json(apiResponse(200, "teacher deleted successfully", deletedTeacher));
         } catch (error: any) {
             console.log(error);
             return res.status(200).json(apiResponse(200, error.message, null));
@@ -191,19 +193,19 @@ class TeacherController {
 
             let whereClause: any = {};
 
-            if (dbUser.ROLE === "INSTITUTION") {
+            if (req.user.type === "INSTITUTION") {
                 whereClause = { instituteId: userId };
             }
 
-            if (dbUser.ROLE === "VENDOR") {
+            if (req.user.type === "VENDOR") {
                 whereClause = { vendorId: userId };
             }
 
             if (
-                dbUser.ROLE !== "SUPERADMIN" &&
-                dbUser.ROLE !== "ADMIN" &&
-                dbUser.ROLE !== "INSTITUTION" &&
-                dbUser.ROLE !== "VENDOR"
+                req.user.type !== "SUPERADMIN" &&
+                req.user.type !== "ADMIN" &&
+                req.user.type !== "INSTITUTION" &&
+                req.user.type !== "VENDOR"
             ) {
                 throw new Error("not authorized to view teachers");
             }
@@ -250,19 +252,19 @@ class TeacherController {
             });
             if (!teacher) throw new Error("teacher not found");
 
-            if (dbUser.ROLE === "INSTITUTION" && teacher.instituteId !== userId) {
+            if (req.user.type === "INSTITUTION" && teacher.instituteId !== userId) {
                 throw new Error("not authorized to view this teacher");
             }
 
-            if (dbUser.ROLE === "VENDOR" && teacher.vendorId !== userId) {
+            if (req.user.type === "VENDOR" && teacher.vendorId !== userId) {
                 throw new Error("not authorized to view this teacher");
             }
 
             if (
-                dbUser.ROLE !== "SUPERADMIN" &&
-                dbUser.ROLE !== "ADMIN" &&
-                dbUser.ROLE !== "INSTITUTION" &&
-                dbUser.ROLE !== "VENDOR"
+                req.user.type !== "SUPERADMIN" &&
+                req.user.type !== "ADMIN" &&
+                req.user.type !== "INSTITUTION" &&
+                req.user.type !== "VENDOR"
             ) {
                 throw new Error("not authorized");
             }

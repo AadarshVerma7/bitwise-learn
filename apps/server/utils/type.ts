@@ -1,3 +1,7 @@
+export interface JwtPayload {
+  id: string;
+  type: "SUPERADMIN" | "ADMIN" | "INSTITUTION" | "VENDOR" | "TEACHER";
+}
 export interface CourseBody {
   name: string;
   description: string;
@@ -99,26 +103,6 @@ export interface GradesBody {
   questionId: string;
   answer: string[];
 }
-<<<<<<< Updated upstream
-
-export interface CreateTeacherBody {
-  name: string;
-  email: string;
-  phoneNumber: string;
-  loginPassword: string;
-  instituteId: string;
-  batchId: string;
-  vendorId?: string;
-}
-
-export interface UpdateTeacherBody {
-  name?: string;
-  email?: string;
-  phoneNumber?: string;
-  loginPassword?: string;
-  batchId?: string;
-  vendorId?: string;
-=======
 export interface DSAQuestionBody {
   name: string;
   description: string;
@@ -165,5 +149,21 @@ export interface ProblemSubmission {
   code: string;
   runtime: string;
   memory: string;
->>>>>>> Stashed changes
+}
+export interface CreateTeacherBody {
+  name: string;
+  email: string;
+  phoneNumber: string;
+  loginPassword: string;
+  instituteId: string;
+  batchId: string;
+  vendorId?: string;
+}
+export interface UpdateTeacherBody {
+  name?: string;
+  email?: string;
+  phoneNumber?: string;
+  loginPassword?: string;
+  batchId?: string;
+  vendorId?: string;
 }

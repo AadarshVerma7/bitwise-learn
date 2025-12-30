@@ -37,7 +37,7 @@ class AdminController {
                     email: data.email,
                     password: hashedPassword,
                     ROLE: "ADMIN",
-                    createdBy: dbSuperAdmin.id,
+                    // createdBy: dbSuperAdmin.id,
                 },
             });
 
