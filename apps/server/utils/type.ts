@@ -99,7 +99,6 @@ export interface GradesBody {
   questionId: string;
   answer: string[];
 }
-<<<<<<< Updated upstream
 
 export interface CreateTeacherBody {
   name: string;
@@ -118,7 +117,8 @@ export interface UpdateTeacherBody {
   loginPassword?: string;
   batchId?: string;
   vendorId?: string;
-=======
+}
+
 export interface DSAQuestionBody {
   name: string;
   description: string;
@@ -165,5 +165,4 @@ export interface ProblemSubmission {
   code: string;
   runtime: string;
   memory: string;
->>>>>>> Stashed changes
 }
