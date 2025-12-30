@@ -17,17 +17,14 @@
       "name": "client",
       "version": "0.1.0",
       "dependencies": {
-<<<<<<< Updated upstream
         "next": "^16.1.1",
         "react": "^19.2.3",
         "react-dom": "^19.2.3",
-=======
         "axios": "^1.13.2",
         "lucide-react": "^0.562.0",
         "next": "16.1.1",
         "react": "19.2.3",
         "react-dom": "19.2.3",
->>>>>>> Stashed changes
       },
       "devDependencies": {
         "@tailwindcss/postcss": "^4",
