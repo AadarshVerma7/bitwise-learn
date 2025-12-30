@@ -1,6 +1,5 @@
 @import "tailwindcss";
 
-<<<<<<< Updated upstream
 @theme {
     --color-divBg: #1E1E1E;
     --color-bg: #121313;
@@ -15,7 +14,7 @@ select:-webkit-autofill {
   -webkit-box-shadow: 0 0 0px 1000px #121313 inset;
   -webkit-text-fill-color: white;
   transition: background-color 5000s ease-in-out 0s;
-=======
+}
 body{
   background-color: #121313;
 }
@@ -35,5 +34,4 @@ body{
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
->>>>>>> Stashed changes
 }
