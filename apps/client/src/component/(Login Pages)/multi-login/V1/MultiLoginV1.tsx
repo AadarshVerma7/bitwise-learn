@@ -70,7 +70,7 @@ export default function AdminLoginV1() {
         const remember = formData.get("remember");
         const role = formData.get("role");
 
-        console.log(email, password, remember, role);
+        // console.log(email, password, remember, role);
     }
 
     return (

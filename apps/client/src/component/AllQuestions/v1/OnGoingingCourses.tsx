@@ -25,9 +25,10 @@ function OngoingCourses() {
   const user = "User";
 
   return (
-    <div className="bg-secondary-bg border border-white/10 p-6 my-3 ml-3">
+    <div className="bg-secondary-bg border border-white/10 p-6 my-3 ml-3 rounded-2xl">
       {/* Header */}
-      <h1 className="text-6xl text-white font-semibold">Welcome, {user}</h1>
+      <span className="text-6xl text-white font-semibold">Welcome,</span>{" "}
+      <span className="text-6xl text-primaryBlue font-semibold"> {user}</span>
       <p className="mt-1 text-xl text-white/60">
         Continue where you left off or pick an ongoing course
       </p>

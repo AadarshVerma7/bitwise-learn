@@ -31,7 +31,7 @@ function QuestionInfoSidebar() {
   const hardLength = CIRCUMFERENCE * hardPercent;
 
   return (
-    <div className="w-1/3 bg-secondary-bg h-95 border-gray-400 border-2   rounded-xl p-6">
+    <div className="w-1/3 mt-3 bg-secondary-bg h-95 border-white/10 border-2  rounded-xl p-6">
       <h2 className="text-white text-lg font-semibold mb-6">Problems Solved</h2>
 
       {/* Ring */}
