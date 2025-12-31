@@ -1,9 +1,5 @@
-import React from 'react'
+import Course from '@/component/courses/Course/Course'
 
-const page = () => {
-  return (
-    <div>This is </div>
-  )
+export default function page() {
+  return <Course />
 }
-
-export default page
