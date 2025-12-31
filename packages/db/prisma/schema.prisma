@@ -132,9 +132,9 @@ model Teacher {
   email         String
   phoneNumber   String
   loginPassword String
-  vendorId      String
+  vendorId      String?
   instituteId   String       @db.ObjectId
-  insitution    Institution  @relation(references: [id], fields: [instituteId])
+  institution   Institution  @relation(references: [id], fields: [instituteId])
   batchId       String       @db.ObjectId
   batch         Batch        @relation(references: [id], fields: [batchId])
   assessments   Assessment[]

@@ -30,15 +30,23 @@ class TeacherController {
             });
             if (!batch) throw new Error("batch does not belong to institution");
 
-            if (data.vendorId) {
+            // Logged-in user is a VENDOR
+            if (req.user.type === "VENDOR") {
                 const vendor = await prismaClient.vendor.findFirst({
-                    where: {
-                        id: data.vendorId,
-                        institutionId: data.instituteId,
-                    },
+                    where: { id: req.user.id },
+                    select: { id: true, institutionId: true },
                 });
-                if (!vendor) throw new Error("invalid vendor for institution");
+
+                if (!vendor) {
+                    throw new Error("vendor not found");
+                }
+
+                if (vendor.institutionId !== data.instituteId) {
+                    throw new Error("vendor does not belong to this institution");
+                }
+
             }
+
 
             const existingTeacher = await prismaClient.teacher.findFirst({
                 where: { email: data.email }
@@ -91,11 +99,11 @@ class TeacherController {
 
             // Check if teacher belongs to the institute
             if (req.user.type === "INSTITUTION" && teacher.instituteId !== userId) {
-                throw new Error("not authorized");
+                throw new Error("teacher does not belongs to your institution");
             }
 
             else if (teacher.vendorId && req.user.type !== "VENDOR" && teacher.vendorId !== userId) {
-                throw new Error("not authorized");
+                throw new Error("teacher does not belongs to this vendor");
             }
 
             const updatedTeacher = await prismaClient.teacher.update({
@@ -150,13 +158,18 @@ class TeacherController {
             });
             if (!teacher) throw new Error("teacher not found");
 
+            // Code to be debugged
+
             if (req.user.type === "INSTITUTION" && teacher.instituteId !== userId) {
-                throw new Error("not authorized");
+                throw new Error("teacher does not belongs to this institution");
             }
 
-            else if (teacher.vendorId && req.user.type !== "VENDOR" && teacher.vendorId !== userId) {
+            else if (req.user.type !== "VENDOR" && teacher.vendorId !== userId) {
                 throw new Error("not authorized");
             }
+            // else if (teacher.vendorId && req.user.type !== "VENDOR" && teacher.vendorId !== userId) {
+            //     throw new Error("not authorized");
+            // }
 
             const deletedTeacher = await prismaClient.teacher.delete({
                 where: { id: teacherId },
@@ -228,10 +241,10 @@ class TeacherController {
 
             if (!teacherId) throw new Error("teacher id is required");
 
-            const dbUser = await prismaClient.user.findFirst({
-                where: { id: userId },
-            });
-            if (!dbUser) throw new Error("no such user found");
+            // const dbUser = await prismaClient.user.findFirst({
+            //     where: { id: userId },
+            // });
+            // if (!dbUser) throw new Error("no such user found");
 
             const teacher = await prismaClient.teacher.findFirst({
                 where: { id: teacherId },
