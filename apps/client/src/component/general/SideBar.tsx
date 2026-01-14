@@ -1,19 +1,33 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
+import {
+  NotebookPen,
+  Code2,
+  LayoutDashboard,
+  ClipboardCheck,
+  LogOut,
+} from "lucide-react";
 
-const MIN_WIDTH = 220;
+const MIN_WIDTH = 60;
 const MAX_WIDTH = 420;
 
-function SideBar() {
-  const [width, setWidth] = useState(280);
+export default function SideBar() {
+  const [width, setWidth] = useState(220);
   const isResizing = useRef(false);
+  const sidebarRef = useRef<HTMLElement | null>(null);
+
+  const isCollapsed = width <= 80;
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      if (!isResizing.current) return;
+      if (!isResizing.current || !sidebarRef.current) return;
 
-      const newWidth = e.clientX;
+      const sidebarLeft =
+        sidebarRef.current.getBoundingClientRect().left;
+      const newWidth = e.clientX - sidebarLeft;
+
       if (newWidth >= MIN_WIDTH && newWidth <= MAX_WIDTH) {
         setWidth(newWidth);
       }
@@ -21,6 +35,8 @@ function SideBar() {
 
     const handleMouseUp = () => {
       isResizing.current = false;
+      document.body.classList.remove("select-none");
+      document.body.style.cursor = "default";
     };
 
     window.addEventListener("mousemove", handleMouseMove);
@@ -32,26 +48,125 @@ function SideBar() {
     };
   }, []);
 
+  const startResizing = () => {
+    isResizing.current = true;
+    document.body.classList.add("select-none");
+    document.body.style.cursor = "col-resize";
+  };
+
   return (
     <aside
+      ref={sidebarRef}
       style={{ width }}
-      className="relative h-screen border-r border-white/10 bg-primary-bg text-white shrink-0"
+      className="
+        relative shrink-0
+        h-full
+        border-r border-white/10
+        bg-primary-bg text-white
+        flex flex-col
+      "
     >
-      {/* Content */}
-      <div className="p-4">content</div>
+      {/* Logo */}
+      <div className="px-4 py-6 flex justify-center">
+        {isCollapsed ? (
+          <span className="text-2xl font-bold text-primaryBlue">B</span>
+        ) : (
+          <h1 className="text-xl font-semibold tracking-wide">
+            <span className="text-primaryBlue">B</span>
+            itwise <span className="opacity-80">Learn</span>
+          </h1>
+        )}
+      </div>
+
+      {/* Navigation */}
+      <nav className="px-2 py-4 space-y-1">
+        <NavLink
+          href="/admin-dashboard/courses"
+          icon={<NotebookPen size={20} />}
+          label="Courses"
+          collapsed={isCollapsed}
+        />
+        <NavLink
+          href="/admin-dashboard/problems"
+          icon={<Code2 size={20} />}
+          label="Problems"
+          collapsed={isCollapsed}
+        />
+        <NavLink
+          href="/admin-dashboard"
+          icon={<LayoutDashboard size={20} />}
+          label="Dashboard"
+          collapsed={isCollapsed}
+        />
+        <NavLink
+          href="/admin-dashboard/reports"
+          icon={<ClipboardCheck size={20} />}
+          label="Reports"
+          collapsed={isCollapsed}
+        />
+      </nav>
+
+      {/* Logout */}
+      <div className="mt-auto px-2 py-4">
+        <button
+          className={`
+            w-full flex items-center
+            ${isCollapsed ? "justify-center px-2" : "gap-3 px-4"}
+            py-2.5 rounded-lg
+            text-sm font-medium
+            text-white/70
+            hover:text-red-400
+            hover:bg-red-500/10
+            transition-all
+          `}
+        >
+          <LogOut size={18} />
+          {!isCollapsed && <span>Log out</span>}
+        </button>
+      </div>
 
       {/* Resize Handle */}
       <div
-        onMouseDown={() => (isResizing.current = true)}
+        onMouseDown={startResizing}
         className="
           absolute top-0 right-0 h-full w-1
           cursor-col-resize
-          bg-transparent
-          hover:bg-white/20
+          hover:bg-primaryBlue/40
         "
       />
     </aside>
   );
 }
 
-export default SideBar;
+
+function NavLink({
+  href,
+  icon,
+  label,
+  collapsed,
+}: {
+  href: string;
+  icon: React.ReactNode;
+  label: string;
+  collapsed: boolean;
+}) {
+  return (
+    <Link href={href} className="block">
+      <div
+        className={`
+          w-full flex items-center
+          ${collapsed ? "justify-center px-2" : "gap-3 px-4"}
+          py-2.5 rounded-lg
+          text-sm font-medium
+          text-white/80
+          hover:text-white
+          hover:bg-white/10
+          transition-all
+        `}
+      >
+        {icon}
+        {!collapsed && <span>{label}</span>}
+      </div>
+    </Link>
+  );
+}
