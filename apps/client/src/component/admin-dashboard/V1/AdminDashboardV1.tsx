@@ -1,17 +1,18 @@
-"use client"
-import SideBar from "@/component/general/SideBar"
-import HeroSection from "./HeroSection"
+"use client";
+
+import SideBar from "@/component/general/SideBar";
+import HeroSection from "./HeroSection";
 
 export default function AdminDashboardV1() {
-    return (
-        <div className="flex">
-            <div>
-                <SideBar />
-            </div>
+  return (
+    <div className="flex h-screen overflow-hidden">
+      {/* Sidebar */}
+      <SideBar />
 
-            <div className="ml-10 mt-10 w-full">
-                <HeroSection />
-            </div>
-        </div>
-    )
+      {/* Main Content */}
+      <main className="flex-1 overflow-y-auto px-10 py-10">
+        <HeroSection />
+      </main>
+    </div>
+  );
 }
