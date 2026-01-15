@@ -25,7 +25,7 @@ function DashboardInfo({ data }: Props) {
   const router = useRouter();
 
   const handleSeeDetails = (institutionId: string) => {
-    router.push(`/institutionInfo?id=${institutionId}`);
+    router.push(`institutions/institutionInfo?id=${institutionId}`);
   };
 
   if (!Array.isArray(data) || data.length === 0) {
