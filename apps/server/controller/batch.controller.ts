@@ -153,15 +153,23 @@ class BatchController {
             }
             const batch = await prismaClient.batch.findFirst({
                 where: { id: batchId },
+
                 select: {
                     id: true,
                     batchname: true,
                     branch: true,
                     batchEndYear: true,
                     institutionId: true,
+                    students: true,
+                    institution: {
+                        select: {
+                            name: true
+                        }
+                    },
                     createdAt: true,
                     updatedAt: true,
                 },
+
             });
             if (!batch) throw new Error("Batch not found");
 

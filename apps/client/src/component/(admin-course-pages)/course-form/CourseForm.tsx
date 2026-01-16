@@ -1,10 +1,11 @@
-import React from 'react'
-import CourseFormV1 from './v1/CourseFormV1'
+import CourseFormV1 from "./v1/CourseFormV1";
 
-const CourseForm = () => {
-  return (
-    <CourseFormV1 />
-  )
-}
+type CourseFormProps = {
+  onClose: () => void;
+};
 
-export default CourseForm
+const CourseForm: React.FC<CourseFormProps> = ({ onClose }) => {
+  return <CourseFormV1 onClose={onClose} />;
+};
+
+export default CourseForm;

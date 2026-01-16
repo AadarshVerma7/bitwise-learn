@@ -118,7 +118,7 @@ model Batch {
   branch        String
   batchEndYear  String
   institutionId String       @db.ObjectId
-  insitution    Institution  @relation(references: [id], fields: [institutionId])
+  institution    Institution  @relation(references: [id], fields: [institutionId])
   teachers      Teacher[]
   students      Student[]
   assessments   Assessment[]

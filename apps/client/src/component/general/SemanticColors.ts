@@ -4,6 +4,8 @@ export const Semantic = {
   background: {
     primary: Palette.custom_black_dark,
     secondary: Palette.custom_black_light,
+    accent: Palette.custom_gray,
+    special: Palette.custom_blue,
   },
 
   hero: {
@@ -17,6 +19,7 @@ export const Semantic = {
     primary: Palette.custom_white,
     secondary: Palette.custom_gray,
     special: Palette.custom_blue,
+    black: Palette.custom_black,
   },
   
   border: {
@@ -28,7 +31,13 @@ export const Semantic = {
 
   icon: {
     primary: Palette.custom_white,
-    secondary: "#000000",
+    secondary: Palette.custom_black,
+    special: Palette.custom_blue,
+  },
+
+  accent: {
+    primary: Palette.custom_black_dark,
+    secondary: Palette.custom_green,
     special: Palette.custom_blue,
   },
 };

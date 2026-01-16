@@ -36,10 +36,14 @@ type Section = {
   topics: Topic[];
 };
 
+type AddSectionProps = {
+  sectionNumber: number;
+};
+
+
 /* ================= COMPONENT ================= */
 
-const AddSectionV1 = () => {
-  const [sectionCount] = useState(1);
+const AddSectionV1 = ({ sectionNumber }: AddSectionProps) => {
   const [sectionCompleted, setSectionCompleted] = useState(false);
   const [sectionError, setSectionError] = useState<string | null>(null);
 
@@ -191,7 +195,7 @@ const AddSectionV1 = () => {
     setSectionCompleted(true);
 
     const sectionData: Section = {
-      sectionId: sectionCount,
+      sectionId: sectionNumber,
       isCompleted: true,
       topics,
     };
@@ -215,13 +219,13 @@ const AddSectionV1 = () => {
   /* ================= UI ================= */
 
   return (
-    <div className="text-white bg-divBg h-full w-200 rounded-2xl px-8 py-6 shadow-xl border border-white/5">
+    <div className="text-white bg-divBg h-full w-[90%] rounded-2xl px-8 py-6 shadow-xl border border-white/5">
 
       {/* SECTION HEADER */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
           <h1 className="text-2xl font-semibold">
-            Section {sectionCount}
+            Section {sectionNumber}
           </h1>
           <span className="text-xs px-3 py-1 rounded-full bg-white/10 text-white/70">
             Curriculum

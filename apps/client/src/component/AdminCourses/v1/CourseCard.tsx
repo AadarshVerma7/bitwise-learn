@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { Clock } from "lucide-react";
+import { Clock, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 const colors = {
@@ -15,11 +15,11 @@ const colors = {
 export type Course = {
   id: string;
   name: string;
-  level: "Basic" | "Intermediate" | "Advanced" | "ALL";
+  level: "BASIC" | "INTERMEDIATE" | "ADVANCED" | "ALL";
   description: string;
   duration?: string;
   thumbnail?: string;
-  instructor: string;
+  instructorName: string;
 };
 
 type CourseCardProps = {
@@ -29,12 +29,16 @@ type CourseCardProps = {
 const CourseCard = ({ course }: CourseCardProps) => {
   const router = useRouter();
 
+  const level = course.level?.toUpperCase();
+
   const levelStyles =
-    course.level === "Basic"
-      ? "text-gray-300"
-      : course.level === "Intermediate"
+    level === "BASIC"
+      ? "text-grey-300"
+      : level === "INTERMEDIATE"
       ? "text-yellow-400"
-      : "text-red-400";
+      : level === "ADVANCED"
+      ? "text-red-400"
+      : "text-gray-400";
 
   const handleNavigate = () => {
     router.push(`/admin-dashboard/courses/${course.id}`);
@@ -42,9 +46,8 @@ const CourseCard = ({ course }: CourseCardProps) => {
 
   return (
     <div
-      onClick={handleNavigate}
       className={`
-        group cursor-pointer overflow-hidden rounded-2xl
+        group overflow-hidden rounded-2xl
         ${colors.secondary_Bg} ${colors.primary_Font}
         p-3 transition-all duration-300
         hover:-translate-y-1 hover:scale-[1.02]
@@ -63,15 +66,19 @@ const CourseCard = ({ course }: CourseCardProps) => {
 
       {/* Content */}
       <div className="flex flex-col gap-4 p-4">
-        <h3 className="text-xl font-semibold tracking-tight">
-          {course.name}
-        </h3>
+        {/* Title + Delete */}
+        <div className="flex items-start justify-between">
+          <h3 className="text-xl font-semibold tracking-tight flex items-center gap-2">
+            {course.name}
+          </h3>
+        </div>
 
+        {/* Level + Duration */}
         <div className={`flex items-center justify-between text-sm ${colors.secondary_Font}`}>
           <span
             className={`rounded-md bg-neutral-800 px-3 py-1 text-xs font-semibold ${levelStyles}`}
           >
-            {course.level}
+            {level}
           </span>
 
           <div className="flex items-center gap-1">
@@ -87,17 +94,19 @@ const CourseCard = ({ course }: CourseCardProps) => {
         <div className="flex items-center justify-between pt-2">
           <div className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-yellow-400 text-sm font-bold text-black">
-              {course.instructor.charAt(0)}
+              {course.instructorName?.charAt(0).toUpperCase()}
             </div>
             <span className="text-sm text-neutral-300">
-              {course.instructor}
+              {course.instructorName}
             </span>
           </div>
 
-          {/* Hover-only text */}
-          <span className="text-sm text-[#64ACFF] opacity-0 transition-opacity group-hover:opacity-100">
+          <button
+            onClick={handleNavigate}
+            className="text-sm text-[#64ACFF] opacity-0 transition-opacity group-hover:opacity-100 cursor-pointer"
+          >
             Manage →
-          </span>
+          </button>
         </div>
       </div>
     </div>

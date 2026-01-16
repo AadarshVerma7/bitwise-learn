@@ -48,7 +48,7 @@ class CoursesController {
         .json(apiResponse(200, "course created", createdCourse));
     } catch (error: any) {
       console.log(error);
-      return res.status(200).json(apiResponse(200, error.message, null));
+      return res.status(200).json(apiResponse(400, error.message, null));
     }
   }
   async uploadThumbnail(req: Request, res: Response) {
@@ -135,7 +135,7 @@ class CoursesController {
           id: dbCourse.id,
         },
         data: {
-          thumbnail: fileLink,
+          certificate: fileLink,
         },
       });
 

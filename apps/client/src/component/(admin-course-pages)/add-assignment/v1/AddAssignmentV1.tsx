@@ -1,43 +1,81 @@
-import React from "react";
-import './assignment.css'
+"use client";
+
+import React, { useState } from "react";
 import AssignmentInfo from "./AssignmentInfo";
 import QuestionEditor from "./QuestionEditor";
-
-const colors = {
-  primary_Bg: "bg-[#121313]",
-  secondary_Bg: "bg-[#1E1E1E]",
-  special_Bg: "bg-[#64ACFF]",
-  primary_Hero: "bg-[#129274]",
-  primary_Hero_Faded: "bg-[rgb(18, 146, 116, 0.24)]",
-  secondary_Hero: "bg-[#64ACFF]",
-  secondary_Hero_Faded: "bg-[rgb(100, 172, 255, 0.56)]",
-  primary_Font: "text-[#FFFFFF]",
-  secondary_Font: "text-[#B1AAA6]",
-  special_Font: "text-[#64ACFF]",
-  accent: "#B1AAA6",
-  accent_Faded: "bg-[rgb(177, 170, 166, 0.41)]",
-  primary_Icon: "white",
-  secondary_Icon: "black",
-  special_Icon: "#64ACFF",
-
-  border: "border-2 border-gray-400",
-};
+import { Colors } from "@/component/general/Colors";
+import { v4 as uuid } from "uuid";
 
 export default function AddAssignmentV1() {
+  const [assignment, setAssignment] = useState({
+    title: "",
+    description: "",
+    instructions: "",
+    marksPerQuestion: 0,
+    questions: [
+      {
+        id: uuid(),
+        text: "",
+        options: [{ id: uuid(), text: "", isCorrect: false }],
+      },
+    ],
+  });
+
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [locked, setLocked] = useState(false);
+
+  const currentQuestion = assignment.questions[currentIndex];
+
+  const saveQuestion = (updatedQuestion: any) => {
+    const updatedQuestions = [...assignment.questions];
+    updatedQuestions[currentIndex] = updatedQuestion;
+    setAssignment({ ...assignment, questions: updatedQuestions });
+  };
+
+  const addNewQuestion = () => {
+    setAssignment({
+      ...assignment,
+      questions: [
+        ...assignment.questions,
+        {
+          id: uuid(),
+          text: "",
+          options: [{ id: uuid(), text: "", isCorrect: false }],
+        },
+      ],
+    });
+    setCurrentIndex(assignment.questions.length);
+  };
+
   return (
-    <div className="absolute inset-0 backdrop-blur-xs flex items-center justify-center">
+    <div className="my-6">
       <div
-        className={`${colors.secondary_Bg} ${colors.border} rounded-xl w-[90%] max-w-6xl min-h-[60%] p-6`}
+        className={`${Colors.background.secondary} ${Colors.border} rounded-xl w-[90%] max-w-6xl min-h-[60%] p-6`}
       >
         <div className="flex h-full gap-6">
           {/* LEFT SECTION */}
-          <AssignmentInfo />
+          <AssignmentInfo
+            assignment={assignment}
+            setAssignment={setAssignment}
+            locked={locked}
+          />
 
           {/* VERTICAL DIVIDER */}
-          <div className={`w-px ${colors.accent_Faded}`} />
+          <div className={`w-px ${Colors.border.fadedThin}`} />
 
           {/* RIGHT SECTION */}
-            <QuestionEditor />
+          <QuestionEditor
+            question={currentQuestion}
+            index={currentIndex}
+            total={assignment.questions.length}
+            saveQuestion={saveQuestion}
+            onPrev={() => setCurrentIndex((i) => i - 1)}
+            onNext={() => setCurrentIndex((i) => i + 1)}
+            onNew={addNewQuestion}
+            onSubmit={() => setLocked(true)}
+            locked={locked}
+            onEdit={() => setLocked(false)}
+          />
         </div>
       </div>
     </div>

@@ -6,17 +6,6 @@ import RightSection from "./RightSection";
 import { Course } from "./CourseCard";
 import SideBar from "@/component/general/SideBar";
 
-const dummyCourses: Course[] = [
-  {
-    id: "1",
-    name: "HTML Basics",
-    level: "Basic",
-    description: "Learn HTML from scratch.",
-    duration: "7d",
-    instructor: "John Doe",
-  },
-];
-
 
 const colors = {
   primary_Bg: "bg-[#121313]",
@@ -45,7 +34,7 @@ export default function AdminCoursesV1() {
 
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto px-10 py-10">
-        <RightSection courses={dummyCourses}/>
+        <RightSection />
       </main>
     </div>
   );

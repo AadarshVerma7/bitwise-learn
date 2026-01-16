@@ -1,8 +1,11 @@
-import AddSection from "@/component/(admin-course-pages)/add-section/AddSection"
+"use client"
+
 import SideBar from "@/component/general/SideBar"
-import CourseForm from "@/component/(admin-course-pages)/course-form/CourseForm"
+import CourseBuilder from "@/component/(admin-course-pages)/course-builder/CourseBuilder";
+import { useState } from "react";
 
 export default function AdminCourse() {
+
     return (
         <div className="flex h-screen overflow-hidden">
             {/* Sidebar */}
@@ -10,7 +13,7 @@ export default function AdminCourse() {
 
             {/* Main Content */}
             <main className="flex-1 overflow-y-auto px-10 py-10">
-                <CourseForm />
+                <CourseBuilder />
             </main>
         </div>
     )

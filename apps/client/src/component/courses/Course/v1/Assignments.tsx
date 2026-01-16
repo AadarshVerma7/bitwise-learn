@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, useRef } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import { ChevronDown, ChevronUp, SearchX, Search } from "lucide-react";
 
@@ -87,6 +88,13 @@ export default function Assignments() {
       return matchesSearch && matchesFilter;
     });
   }, [search, filter]);
+
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const handleRoute = () => {
+    router.push(`${pathname}/assignment/assignment-1`);
+  };
 
   return (
     <div className="h-full w-full p-4 space-y-6 overflow-y-auto">
@@ -248,7 +256,7 @@ export default function Assignments() {
                       Already Submitted
                     </button>
                   ) : (
-                    <button className="mt-2 bg-[#64ACFF] text-black text-xs py-2 rounded-md cursor-pointer">
+                    <button className="mt-2 bg-[#64ACFF] text-black text-xs py-2 rounded-md cursor-pointer" onClick={handleRoute}>
                       Start Now
                     </button>
                   )}

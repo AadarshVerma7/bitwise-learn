@@ -1,71 +1,65 @@
-import React from 'react'
+"use client";
 
-const colors = {
-  primary_Bg: "bg-[#121313]",
-  secondary_Bg: "bg-[#1E1E1E]",
-  special_Bg: "bg-[#64ACFF]",
-  primary_Hero: "bg-[#129274]",
-  primary_Hero_Faded: "bg-[rgb(18, 146, 116, 0.24)]",
-  secondary_Hero: "bg-[#64ACFF]",
-  secondary_Hero_Faded: "bg-[rgb(100, 172, 255, 0.56)]",
-  primary_Font: "text-[#FFFFFF]",
-  secondary_Font: "text-[#B1AAA6]",
-  special_Font: "text-[#64ACFF]",
-  accent: "#B1AAA6",
-  accent_Faded: "bg-[rgb(177, 170, 166, 0.41)]",
-  primary_Icon: "white",
-  secondary_Icon: "black",
-  special_Icon: "#64ACFF",
+import React, { useState } from "react";
+import { Colors } from "@/component/general/Colors";
 
-  border: "border-2 border-gray-400",
-};
-
-export default function AssignmentInfo() {
+export default function AssignmentInfo({
+  assignment,
+  setAssignment,
+  locked,
+}: any) {
+  const update = (key: string, value: any) =>
+    setAssignment({ ...assignment, [key]: value });
+  // const [title, setTitle] = useState("");
   return (
     <div className="flex w-1/2 flex-col gap-6">
-            {/* Assignment Name */}
-            <div className="flex flex-col gap-2">
-                            <label className={colors.primary_Font}>
-                <span className={`${colors.special_Font} font-semibold`}>Assignment</span> <span>Name</span>
-              </label>
-              <input
-                
-                className={`h-10 w-full rounded-lg ${colors.primary_Font} p-2 ${colors.primary_Bg}`}
-              />
-            </div>
+      <h1 className={`${Colors.text.primary} font-semibold text-xl`}>
+        {assignment.title || "Assignment Title"}
+      </h1>
+      {/* Assignment Name */}
+      <div className="flex flex-col gap-2">
+        <input
+          disabled={locked}
+          placeholder="Title: Example Title"
+          value={assignment.title}
+          className={`h-10 w-full rounded-lg ${Colors.text.primary} p-2 ${Colors.background.secondary} ${Colors.border.fadedThin} text-sm placeholder:text-white/40 disabled:opacity-50`}
+          onChange={(e) => update("title", e.target.value)}
+        />
+      </div>
 
-            {/* Assignment Description */}
-            <div className="flex flex-col gap-2">
-              <label className={colors.primary_Font}>
-                <span className={`${colors.special_Font} font-semibold`}>Assignment</span> <span>Description</span>
-              </label>
-              <textarea
-                
-                className={`h-20 w-full no-scrollbar rounded-lg ${colors.primary_Font} p-2 ${colors.primary_Bg} resize-none`}
-              />
-            </div>
+      {/* Assignment Description */}
+      <div className="flex flex-col gap-2">
+        <textarea
+          disabled={locked}
+          placeholder="Description: Example Description"
+          value={assignment.description}
+          className={`h-20 w-full no-scrollbar rounded-lg ${Colors.text.primary} p-2 ${Colors.background.secondary} ${Colors.border.fadedThin} resize-none text-sm placeholder:text-white/40 disabled:opacity-50`}
+          onChange={(e) => update("description", e.target.value)}
+        />
+      </div>
 
-            {/* Assignment Instructions */}
-            <div className="flex flex-col gap-2">
-              <label className={colors.primary_Font}>
-                <span className={`${colors.special_Font} font-semibold`}>Assignment</span> <span>Instructions</span>
-              </label>
-              <textarea
-                
-                className={`h-20 w-full no-scrollbar rounded-lg ${colors.primary_Font} p-2 ${colors.primary_Bg} resize-none`}
-              />
-            </div>
+      {/* Assignment Instructions */}
+      <div className="flex flex-col gap-2">
+        <textarea
+          disabled={locked}
+          placeholder="Instructions: Example Instruction"
+          value={assignment.instructions}
+          className={`h-20 w-full no-scrollbar rounded-lg ${Colors.text.primary} p-2 ${Colors.background.secondary} ${Colors.border.fadedThin} resize-none text-sm placeholder:text-white/40 disabled:opacity-50`}
+          onChange={(e) => update("instructions", e.target.value)}
+        />
+      </div>
 
-            {/* Marks Per Question */}
-            <div className="flex items-center justify-between gap-4">
-              <label className={colors.primary_Font}>
-                <span className={`${colors.special_Font} font-semibold`}>Marks</span> <span>per question</span>
-              </label>
-              <input
-                
-                className={`h-8 w-24 rounded-lg ${colors.primary_Font} p-2 ${colors.primary_Bg}`}
-              />
-            </div>
-          </div>
-  )
+      {/* Marks Per Question */}
+      <div className="flex items-center justify-between gap-4">
+        <input
+          disabled={locked}
+          type="number"
+          placeholder="Marks Per Question"
+          value={assignment.marksPerQuestion}
+          className={`h-8 w-1/2 rounded-lg ${Colors.text.primary} p-2 ${Colors.background.secondary} ${Colors.border.fadedThin} text-sm placeholder:text-white/40 disabled:opacity-50`}
+          onChange={(e) => update("marksPerQuestion", +e.target.value)}
+        />
+      </div>
+    </div>
+  );
 }

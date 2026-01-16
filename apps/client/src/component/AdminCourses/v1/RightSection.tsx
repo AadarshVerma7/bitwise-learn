@@ -5,10 +5,10 @@ import CourseCard, { Course } from "./CourseCard";
 import { useState, useEffect } from "react";
 import { Search, BookAlert } from "lucide-react";
 import { useRouter } from "next/navigation";
-
-type RightSectionProps = {
-  courses: Course[];
-};
+import { getAllCourses } from "@/api/courses/get-all-courses";
+import { ChevronDown, ChevronUp } from "lucide-react";
+import { useRef } from "react";
+import CourseForm from "@/component/(admin-course-pages)/course-form/CourseForm";
 
 const colors = {
   primary_Bg: "bg-[#121313]",
@@ -30,14 +30,33 @@ const colors = {
   border: "border-t-2 border-[#B1AAA6]",
 };
 
-const RightSection = ({ courses }: RightSectionProps) => {
+const RightSection = () => {
+  const [courses, setCourses] = useState<Course[]>([]);
   const [searchText, setSearchText] = useState("");
   const [filteredCourses, setFilteredCourses] = useState<Course[]>([]);
   const [filter, setFilter] = useState<
-    "ALL" | "Basic" | "Intermediate" | "Advanced"
+    "ALL" | "BASIC" | "INTERMEDIATE" | "ADVANCED"
   >("ALL");
+  const [open, setOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
+  const [loading, setLoading] = useState(true);
 
-      const router = useRouter();
+  const router = useRouter();
+
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const data = await getAllCourses();
+        setCourses(data.data);
+      } catch (error) {
+        console.error("Failed to fetch courses", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCourses();
+  }, []);
 
   useEffect(() => {
     let result = courses;
@@ -49,15 +68,63 @@ const RightSection = ({ courses }: RightSectionProps) => {
     }
 
     if (filter !== "ALL") {
-      result = result.filter((course) => course.level === filter);
+      result = result.filter(
+        (course) => course.level?.toUpperCase() === filter
+      );
     }
 
     setFilteredCourses(result);
   }, [searchText, filter, courses]);
 
-  /* ---------------- NO DATA STATE ---------------- */
-  if (!courses || courses.length === 0) {
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target as Node)
+      ) {
+        setOpen(false);
+      }
+    }
 
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const [courseForm, setShowCourseForm] = useState(false);
+
+
+  const CourseSkeleton = () => {
+    return (
+      <div
+        className="
+        rounded-xl p-4 flex flex-col gap-4
+        bg-[#1E1E1E] animate-pulse
+      "
+      >
+        <div className="h-40 w-full rounded-lg bg-white/10" />
+
+        <div className="h-5 w-3/4 rounded bg-white/10" />
+
+        <div className="flex justify-between">
+          <div className="h-4 w-20 rounded bg-white/10" />
+          <div className="h-4 w-16 rounded bg-white/10" />
+        </div>
+
+        <div className="space-y-2">
+          <div className="h-4 rounded bg-white/10" />
+          <div className="h-4 w-5/6 rounded bg-white/10" />
+        </div>
+
+        <div className="flex justify-end gap-2 mt-auto">
+          <div className="w-7 h-7 rounded-full bg-white/10" />
+          <div className="h-4 w-20 rounded bg-white/10" />
+        </div>
+      </div>
+    );
+  };
+
+  /* ---------------- NO DATA STATE ---------------- */
+  if (!loading && courses.length === 0) {
     return (
       <section className="flex h-full w-full flex-col items-center justify-center gap-6 p-6 text-center">
         {/* Text Above */}
@@ -93,7 +160,7 @@ const RightSection = ({ courses }: RightSectionProps) => {
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.97 }}
-          onClick={()=>router.push("/admin-dashboard/courses/123")}
+          onClick={() => router.push("/admin-dashboard/courses/create")}
           className={`rounded-md ${colors.special_Bg} px-6 py-2 font-medium ${colors.primary_Font}`}
         >
           + Create your first course
@@ -125,28 +192,82 @@ const RightSection = ({ courses }: RightSectionProps) => {
         <div className="flex gap-3">
           {/* Add Course */}
           <button
-            onClick={()=>router.push("/admin-dashboard/courses/123")}
+            // onClick={() => router.push("/admin-dashboard/courses/create")}
+            onClick={() => setShowCourseForm(true)}
             className={`rounded-md ${colors.special_Bg} px-4 py-2 text-sm font-medium ${colors.primary_Font} hover:opacity-90`}
           >
             + Add Course
           </button>
 
-          {/* Filter */}
-          <select
-            value={filter}
-            onChange={(e) => setFilter(e.target.value as any)}
-            className={`rounded-md ${colors.secondary_Bg} px-4 py-2 text-sm outline-none ${colors.primary_Font}`}
-          >
-            <option value="ALL">All Levels</option>
-            <option value="Basic">Basic</option>
-            <option value="Intermediate">Intermediate</option>
-            <option value="Advanced">Advanced</option>
-          </select>
+          {/* Filter Dropdown */}
+          <div className="relative" ref={dropdownRef}>
+            <button
+              onClick={() => setOpen((p) => !p)}
+              className={`
+      flex items-center gap-2 px-4 py-2 rounded-md
+      ${colors.secondary_Bg} ${colors.primary_Font}
+      text-sm font-medium border border-neutral-700
+      hover:border-neutral-500 transition
+    `}
+            >
+              {filter === "ALL"
+                ? "All Levels"
+                : filter.charAt(0) + filter.slice(1).toLowerCase()}
+              {open ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            </button>
+
+            {open && (
+              <div
+                className="
+        absolute right-0 mt-2 w-44
+        rounded-xl bg-[#121313]
+        border border-white/10
+        shadow-lg overflow-hidden z-50
+      "
+              >
+                {[
+                  { label: "All Levels", value: "ALL" },
+                  { label: "Basic", value: "BASIC", color: "text-white" },
+                  {
+                    label: "Intermediate",
+                    value: "INTERMEDIATE",
+                    color: "text-yellow-400",
+                  },
+                  {
+                    label: "Advanced",
+                    value: "ADVANCED",
+                    color: "text-red-400",
+                  },
+                ].map((item) => (
+                  <button
+                    key={item.value}
+                    onClick={() => {
+                      setFilter(item.value as any);
+                      setOpen(false);
+                    }}
+                    className={`
+            w-full px-4 py-2 text-left text-sm
+            hover:bg-white/5 transition
+            ${item.color ?? colors.primary_Font}
+          `}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
       {/* -------- SEARCH EMPTY STATE -------- */}
-      {filteredCourses.length === 0 ? (
+      {loading ? (
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <CourseSkeleton key={i} />
+          ))}
+        </div>
+      ) : filteredCourses.length === 0 ? (
         <div className="flex flex-col items-center justify-center gap-6 pt-20 text-center">
           {/* Animated Visual */}
           <motion.div
@@ -185,10 +306,34 @@ const RightSection = ({ courses }: RightSectionProps) => {
         /* Cards */
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
           {filteredCourses.map((course) => (
-            <CourseCard key={course.id} course={course} />
+            <CourseCard
+              key={course.id}
+              course={course}
+            />
           ))}
         </div>
       )}
+
+
+      {courseForm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          {/* BACKDROP */}
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => setShowCourseForm(false)}
+          />
+
+          {/* MODAL CONTENT */}
+          <div
+            className="relative z-50 w-full max-w-2xl rounded-2xl bg-[#121313] shadow-2xl p-1"
+            onClick={(e) => e.stopPropagation()} // ⭐ IMPORTANT
+          >
+            <CourseForm onClose={() => setShowCourseForm(false)} />
+          </div>
+        </div>
+      )}
+
+
     </section>
   );
 };
