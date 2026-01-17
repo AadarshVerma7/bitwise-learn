@@ -33,7 +33,11 @@ function V1AllVendors() {
           </button>
         </div>
         <Filter data={data} setFilteredData={setFilteredData} />
-        <DashboardInfo data={filteredData} />
+        <DashboardInfo
+          data={filteredData}
+          onUpdate={() => {}}
+          onDelete={() => {}}
+        />
       </div>
     </div>
   );

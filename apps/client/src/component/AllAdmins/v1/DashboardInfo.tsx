@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { X } from "lucide-react";
+import { X, Pencil, Trash2 } from "lucide-react";
 
 type UserData = {
   id: string;
@@ -12,8 +12,20 @@ type UserData = {
   updatedAt: string;
 };
 
+type UpdatePayload = {
+  entity: "admins";
+  data: UserData;
+};
+
+type DeletePayload = {
+  entity: "admins";
+  id: string;
+};
+
 type Props = {
   data: UserData[];
+  onUpdate: (payload: UpdatePayload) => void;
+  onDelete: (payload: DeletePayload) => void;
 };
 
 function formatDate(date: string) {
@@ -29,8 +41,32 @@ function formatValue(value: any) {
   return String(value);
 }
 
-function DashboardInfo({ data }: Props) {
+function DashboardInfo({ data, onUpdate, onDelete }: Props) {
   const [selected, setSelected] = useState<UserData | null>(null);
+
+  /* ------------------ HANDLERS ------------------ */
+
+  const handleUpdate = () => {
+    if (!selected) return;
+
+    onUpdate({
+      entity: "admins",
+      data: selected,
+    });
+  };
+
+  const handleDelete = () => {
+    if (!selected) return;
+
+    onDelete({
+      entity: "admins",
+      id: selected.id,
+    });
+
+    setSelected(null);
+  };
+
+  /* --------------------------------------------- */
 
   if (!Array.isArray(data) || data.length === 0) {
     return (
@@ -44,7 +80,7 @@ function DashboardInfo({ data }: Props) {
     <>
       {/* Table */}
       <div
-        className="w-full overflow-y-auto border  bg-divBg shadow-lg"
+        className="w-full overflow-y-auto border bg-divBg shadow-lg"
         style={{
           scrollbarWidth: "none",
           msOverflowStyle: "none",
@@ -52,7 +88,7 @@ function DashboardInfo({ data }: Props) {
           WebkitScrollbar: { display: "none" },
         }}
       >
-        <table className="w-full ">
+        <table className="w-full">
           <thead className="bg-black/30">
             <tr className="text-left text-[11px] font-semibold uppercase tracking-wide text-white/40">
               <th className="px-6 py-4">Name</th>
@@ -110,16 +146,39 @@ function DashboardInfo({ data }: Props) {
             </button>
 
             {/* Header */}
-            <div className="mb-6">
-              <h2 className="text-xl font-semibold text-white">User Details</h2>
-              <p className="mt-1 text-sm text-white/40">ID: {selected.id}</p>
+            <div className="mb-6 mt-6 flex items-start justify-between gap-4">
+              <div>
+                <h2 className="text-xl font-semibold text-white">
+                  User Details
+                </h2>
+                <p className="mt-1 text-sm text-white/40">ID: {selected.id}</p>
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-2">
+                <button
+                  onClick={handleUpdate}
+                  className="flex items-center gap-1 rounded-md border border-primaryBlue/40 px-3 py-1.5 text-xs font-medium text-primaryBlue transition hover:bg-primaryBlue/20"
+                >
+                  <Pencil size={14} />
+                  Edit
+                </button>
+
+                <button
+                  onClick={handleDelete}
+                  className="flex items-center gap-1 rounded-md border border-red-500/40 px-3 py-1.5 text-xs font-medium text-red-400 transition hover:bg-red-500/20"
+                >
+                  <Trash2 size={14} />
+                  Delete
+                </button>
+              </div>
             </div>
 
             {/* Content */}
             <div className="grid max-h-[60vh] grid-cols-1 gap-x-6 gap-y-5 overflow-y-auto pr-2 sm:grid-cols-2">
               {Object.entries(selected).map(([key, value]) => (
                 <div key={key}>
-                  <p className="mt-2 text-[11px] uppercase tracking-wide text-primaryBlue">
+                  <p className="mt-2 mb-2 text-[11px] uppercase tracking-wide text-primaryBlue">
                     {key.replace(/_/g, " ")}
                   </p>
                   <p className="mb-2 break-words text-sm text-white">

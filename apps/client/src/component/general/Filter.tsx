@@ -28,17 +28,19 @@ function Filter({
   }, [filteredData, setFilteredData]);
 
   return (
-    <div className="relative mb-3">
-      <Search
-        size={16}
-        className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40"
-      />
-      <input
-        placeholder="Search..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="w-full pl-9 pr-3 py-2 bg-black/30 text-white rounded-lg outline-none focus:ring-1 focus:ring-primaryBlue"
-      />
+    <div className="w-full flex">
+      <div className="relative mb-3 w-1/3">
+        <Search
+          size={16}
+          className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40"
+        />
+        <input
+          placeholder="Search..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full pl-9 pr-3 py-2 bg-black/30 text-white rounded-lg outline-none focus:ring-1 focus:ring-primaryBlue"
+        />
+      </div>
     </div>
   );
 }

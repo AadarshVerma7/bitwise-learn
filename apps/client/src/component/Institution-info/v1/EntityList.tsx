@@ -2,305 +2,295 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { X } from "lucide-react";
+import { X, Pencil, Save, Trash } from "lucide-react";
+
 import { getAllTeachers } from "@/api/teachers/get-all-teachers";
 import { getAllBatches } from "@/api/batches/get-all-batches";
 import { getAllVendors } from "@/api/vendors/get-all-vendors";
 
 type EntityListProps = {
-    type: string;
-    institutionId?: string;
+  type: string;
+  institutionId?: string;
 };
 
-export const EntityList = ({ type, institutionId }: EntityListProps) => {
-    const router = useRouter();
-    const [entities, setEntities] = useState<any[]>([]);
-    const [searchQuery, setSearchQuery] = useState("");
-    const [loading, setLoading] = useState(true);
-    const [selectedEntity, setSelectedEntity] = useState<any | null>(null);
+export const EntityList = ({ type }: EntityListProps) => {
+  const router = useRouter();
 
-    const handleSeeDetails = (entity: any) => {
-        if (type === "Batches") {
-            // Navigate to batch detail page
-            router.push(`/admin-dashboard/batches/${entity.id || entity._id}`);
-        } else {
-            // Open modal for other entity types
-            setSelectedEntity(entity);
-        }
-    };
+  const [entities, setEntities] = useState<any[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        setLoading(true);
-        const fetchData = async () => {
-            try {
-                switch (type) {
-                    case "Teachers":
-                        await getAllTeachers((data: any) => {
-                            setEntities(Array.isArray(data) ? data : []);
-                        });
-                        break;
-                    case "Batches":
-                        await getAllBatches((data: any) => {
-                            setEntities(Array.isArray(data) ? data : []);
-                        });
-                        break;
-                    case "Vendors":
-                        await getAllVendors((data: any) => {
-                            setEntities(Array.isArray(data) ? data : []);
-                        });
-                        break;
-                    case "Courses":
-                        // TODO: Add courses API when available
-                        setEntities([]);
-                        break;
-                    default:
-                        setEntities([]);
-                }
-            } catch (error) {
-                console.error(`Error fetching ${type}:`, error);
-                setEntities([]);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchData();
-    }, [type]);
+  const [selectedEntity, setSelectedEntity] = useState<any | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editData, setEditData] = useState<any>({});
 
-    const filteredEntities = useMemo(() => {
-        // Ensure entities is always an array
-        const safeEntities = Array.isArray(entities) ? entities : [];
+  /* ----------------------------- Helpers ----------------------------- */
 
-        if (!searchQuery) return safeEntities;
+  const isEditableEntity = type === "Teachers" || type === "Vendors";
 
-        return safeEntities.filter((entity) => {
-            switch (type) {
-                case "Teachers":
-                    return (
-                        entity.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                        entity.email?.toLowerCase().includes(searchQuery.toLowerCase())
-                    );
-                case "Batches":
-                    return (
-                        entity.batchname?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                        entity.branch?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                        entity.batchEndYear?.toLowerCase().includes(searchQuery.toLowerCase())
-                    );
-                case "Vendors":
-                    return (
-                        entity.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                        entity.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                        entity.tagline?.toLowerCase().includes(searchQuery.toLowerCase())
-                    );
-                case "Courses":
-                    return (
-                        entity.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                        entity.description?.toLowerCase().includes(searchQuery.toLowerCase())
-                    );
-                default:
-                    return true;
-            }
-        });
-    }, [entities, searchQuery, type]);
+  const backendEntityType =
+    type === "Teachers" ? "teacher" : type === "Vendors" ? "vendor" : null;
 
+  const formatDate = (date?: string) =>
+    date ? new Date(date).toLocaleDateString() : "—";
 
-    const getDisplayName = (entity: any) => {
+  const formatValue = (value: any) => {
+    if (value === null || value === undefined) return "—";
+    if (typeof value === "string" && value.includes("T")) {
+      const d = new Date(value);
+      if (!isNaN(d.getTime())) return d.toLocaleString();
+    }
+    return String(value);
+  };
+
+  /* ----------------------------- Fetch ----------------------------- */
+
+  useEffect(() => {
+    setLoading(true);
+
+    const fetchData = async () => {
+      try {
         switch (type) {
-            case "Teachers":
-                return entity.name || "Unknown";
-            case "Batches":
-                return entity.batchname || "Unknown Batch";
-            case "Vendors":
-                return entity.name || "Unknown Vendor";
-            case "Courses":
-                return entity.name || "Unknown Course";
-            default:
-                return "Unknown";
+          case "Teachers":
+            await getAllTeachers((data: any) => setEntities(data || []));
+            break;
+          case "Batches":
+            await getAllBatches((data: any) => setEntities(data || []));
+            break;
+          case "Vendors":
+            await getAllVendors((data: any) => setEntities(data || []));
+            break;
+          default:
+            setEntities([]);
         }
+      } catch (err) {
+        console.error(err);
+        setEntities([]);
+      } finally {
+        setLoading(false);
+      }
     };
 
-    const getEntityKey = (entity: any) => {
-        return entity.id || entity._id || Math.random().toString();
-    };
+    fetchData();
+  }, [type]);
 
-    const formatDate = (date?: string) => {
-        if (!date) return "—";
-        return new Date(date).toLocaleDateString();
-    };
+  /* ----------------------------- Filtering ----------------------------- */
 
-    const formatValue = (value: any) => {
-        if (value === null || value === undefined) return "—";
-        if (typeof value === "string" && value.includes("T")) {
-            const date = new Date(value);
-            if (!isNaN(date.getTime())) return date.toLocaleString();
-        }
-        return String(value);
-    };
+  const filteredEntities = useMemo(() => {
+    if (!searchQuery) return entities;
 
-    const getTableHeaders = () => {
-        switch (type) {
-            case "Teachers":
-                return ["Name", "Email", "Phone", "Created"];
-            case "Batches":
-                return ["Batch Name", "Branch", "End Year", "Created"];
-            case "Vendors":
-                return ["Name", "Email", "Tagline", "Created"];
-            case "Courses":
-                return ["Name", "Instructor", "Level", "Created"];
-            default:
-                return ["Name", "Created"];
-        }
-    };
+    return entities.filter((entity) => {
+      const q = searchQuery.toLowerCase();
 
-    const getTableCells = (entity: any) => {
-        switch (type) {
-            case "Teachers":
-                return [
-                    entity.name || "Unknown",
-                    entity.email || "—",
-                    entity.phoneNumber || "—",
-                    formatDate(entity.createdAt),
-                ];
-            case "Batches":
-                return [
-                    entity.batchname || "Unknown Batch",
-                    entity.branch || "—",
-                    entity.batchEndYear || "—",
-                    formatDate(entity.createdAt),
-                ];
-            case "Vendors":
-                return [
-                    entity.name || "Unknown Vendor",
-                    entity.email || "—",
-                    entity.tagline || "—",
-                    formatDate(entity.createdAt),
-                ];
-            case "Courses":
-                return [
-                    entity.name || "Unknown Course",
-                    entity.instructorName || "—",
-                    entity.level || "—",
-                    formatDate(entity.createdAt),
-                ];
-            default:
-                return [
-                    getDisplayName(entity),
-                    formatDate(entity.createdAt),
-                ];
-        }
-    };
+      if (type === "Teachers")
+        return (
+          entity.name?.toLowerCase().includes(q) ||
+          entity.email?.toLowerCase().includes(q)
+        );
 
-    return (
-        <>
-            <div className="rounded-xl p-4 mr-4">
-                <input
-                    placeholder={`Search for ${type.toLowerCase()}`}
-                    className="w-full mb-4 bg-[#141414] border border-gray-700 rounded-md px-3 py-2 text-sm text-white outline-none"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                />
+      if (type === "Vendors")
+        return (
+          entity.name?.toLowerCase().includes(q) ||
+          entity.email?.toLowerCase().includes(q) ||
+          entity.tagline?.toLowerCase().includes(q)
+        );
 
-                {loading ? (
-                    <div className="py-12 text-center text-sm text-white/50">
-                        Loading...
-                    </div>
-                ) : !filteredEntities || filteredEntities.length === 0 ? (
-                    <div className="py-12 text-center text-sm text-white/50">
-                        {searchQuery
-                            ? `No ${type.toLowerCase()} found`
-                            : `No ${type.toLowerCase()} available`}
-                    </div>
-                ) : (
-                    <div className="w-full overflow-x-auto border border-white/10 bg-divBg shadow-lg">
-                        <table className="w-full border-collapse">
-                            <thead className="bg-black/30">
-                                <tr className="text-left text-[11px] font-semibold uppercase tracking-wide text-white/40">
-                                    {getTableHeaders().map((header) => (
-                                        <th key={header} className="px-6 py-4">
-                                            {header}
-                                        </th>
-                                    ))}
-                                    <th className="px-6 py-4 text-right">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-white/5">
-                                {filteredEntities.map((entity) => {
-                                    const cells = getTableCells(entity);
-                                    return (
-                                        <tr
-                                            key={getEntityKey(entity)}
-                                            className="text-sm text-white transition-colors"
-                                        >
-                                            {cells.map((cell, index) => (
-                                                <td
-                                                    key={index}
-                                                    className={`px-6 py-4 ${index === 0 ? "font-medium" : ""
-                                                        } ${index === cells.length - 1
-                                                            ? "text-white/60"
-                                                            : index === 0
-                                                                ? ""
-                                                                : "text-white/70 truncate"
-                                                        }`}
-                                                >
-                                                    {cell}
-                                                </td>
-                                            ))}
-                                            <td className="px-6 py-4 text-right">
-                                                <button
-                                                    onClick={() => handleSeeDetails(entity)}
-                                                    className="rounded-md border border-primaryBlue/40 px-3 py-1.5 text-xs font-medium text-primaryBlue transition hover:bg-primaryBlue/20"
-                                                >
-                                                    See details
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
-                    </div>
-                )}
+      if (type === "Batches")
+        return (
+          entity.batchname?.toLowerCase().includes(q) ||
+          entity.branch?.toLowerCase().includes(q)
+        );
+
+      return true;
+    });
+  }, [entities, searchQuery, type]);
+
+  /* ----------------------------- Actions ----------------------------- */
+
+  const handleSeeDetails = (entity: any) => {
+    if (type === "Batches") {
+      router.push(`/admin-dashboard/batches/${entity.id || entity._id}`);
+      return;
+    }
+
+    setSelectedEntity(entity);
+    setEditData(entity);
+    setIsEditing(false);
+  };
+
+  const handleEditChange = (key: string, value: string) => {
+    setEditData((prev: any) => ({ ...prev, [key]: value }));
+  };
+
+  const handleUpdate = async () => {
+    if (!backendEntityType) return;
+
+    // await updateEntity({
+    //   entity: backendEntityType,
+    // id: selectedEntity.id || selectedEntity._id,
+    //   data: editData,
+    // });
+
+    setEntities((prev) =>
+      prev.map((e) =>
+        (e.id || e._id) === (editData.id || editData._id) ? editData : e
+      )
+    );
+
+    setSelectedEntity(editData);
+    setIsEditing(false);
+  };
+
+  const handleDelete = async () => {
+    if (!backendEntityType || !selectedEntity) return;
+
+    const ok = confirm("Are you sure you want to delete?");
+    if (!ok) return;
+
+    // await deleteEntity({
+    //   entity: backendEntityType,
+    //   id: selectedEntity.id || selectedEntity._id,
+    // });
+
+    setEntities((prev) =>
+      prev.filter(
+        (e) => (e.id || e._id) !== (selectedEntity.id || selectedEntity._id)
+      )
+    );
+
+    setSelectedEntity(null);
+  };
+
+  /* ----------------------------- Render ----------------------------- */
+
+  return (
+    <>
+      <div className="rounded-xl p-4 mr-4">
+        <input
+          placeholder={`Search ${type.toLowerCase()}`}
+          className="w-full mb-4 bg-[#141414] border border-gray-700 rounded-md px-3 py-2 text-sm text-white outline-none"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+
+        {loading ? (
+          <div className="py-12 text-center text-white/50">Loading...</div>
+        ) : filteredEntities.length === 0 ? (
+          <div className="py-12 text-center text-white/50">
+            No {type.toLowerCase()} found
+          </div>
+        ) : (
+          <div className="border border-white/10 bg-divBg">
+            <table className="w-full">
+              <thead className="bg-black/30 text-xs text-white/40">
+                <tr>
+                  <th className="px-6 py-4 text-left">Name</th>
+                  <th className="px-6 py-4 text-left">Created</th>
+                  <th className="px-6 py-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5">
+                {filteredEntities.map((entity) => (
+                  <tr key={entity.id || entity._id}>
+                    <td className="px-6 py-4 text-white font-medium">
+                      {entity.name || entity.batchname}
+                    </td>
+                    <td className="px-6 py-4 text-white/60">
+                      {formatDate(entity.createdAt)}
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <button
+                        onClick={() => handleSeeDetails(entity)}
+                        className="border border-primaryBlue/40 px-3 py-1.5 text-xs text-primaryBlue hover:bg-primaryBlue/20"
+                      >
+                        See details
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* ===================== MODAL ===================== */}
+      {selectedEntity && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+          <div className="relative w-full max-w-xl bg-divBg p-6 rounded-xl">
+            <button
+              onClick={() => setSelectedEntity(null)}
+              className="absolute right-4 top-4 text-white/50 hover:text-white"
+            >
+              <X />
+            </button>
+
+            <h2 className="text-xl font-semibold mb-6 text-white">
+              {type} Details
+            </h2>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[60vh] overflow-y-auto">
+              {Object.entries(isEditing ? editData : selectedEntity)
+                .filter(([key]) => !["_id", "id", "createdAt"].includes(key))
+                .map(([key, value]) => (
+                  <div key={key}>
+                    <p className="text-xs uppercase text-primaryBlue mb-1">
+                      {key}
+                    </p>
+                    {isEditing ? (
+                      <input
+                        value={String(value ?? "")}
+                        onChange={(e) => handleEditChange(key, e.target.value)}
+                        className="w-full bg-black/40 border border-white/10 px-3 py-2 text-sm text-white rounded"
+                      />
+                    ) : (
+                      <p className="text-sm text-white">{formatValue(value)}</p>
+                    )}
+                  </div>
+                ))}
             </div>
 
-            {/* Details Modal */}
-            {selectedEntity && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-                    <div className="relative w-full max-w-xl rounded-2xl border border-white/10 bg-divBg p-6 shadow-2xl">
-                        {/* Close Button */}
-                        <button
-                            onClick={() => setSelectedEntity(null)}
-                            className="absolute right-4 top-4 text-white/50 transition hover:text-white"
-                        >
-                            <X size={20} />
-                        </button>
-
-                        {/* Header */}
-                        <div className="mb-6">
-                            <h2 className="text-xl font-semibold text-white">
-                                {type} Details
-                            </h2>
-                            <p className="mt-1 text-sm text-white/40">
-                                ID: {selectedEntity.id || selectedEntity._id || "N/A"}
-                            </p>
-                        </div>
-
-                        {/* Content */}
-                        <div className="grid max-h-[60vh] grid-cols-1 gap-x-6 gap-y-5 overflow-y-auto pr-2 sm:grid-cols-2">
-                            {Object.entries(selectedEntity)
-                                .filter(([key]) => key !== "id" && key !== "_id")
-                                .map(([key, value]) => (
-                                    <div key={key}>
-                                        <p className="my-3 text-[11px] uppercase tracking-wide text-primaryBlue">
-                                            {key.replace(/_/g, " ")}
-                                        </p>
-                                        <p className="break-words text-sm text-white">
-                                            {formatValue(value)}
-                                        </p>
-                                    </div>
-                                ))}
-                        </div>
-                    </div>
-                </div>
+            {isEditableEntity && (
+              <div className="mt-6 flex justify-end gap-3">
+                {isEditing ? (
+                  <>
+                    <button
+                      onClick={handleUpdate}
+                      className="flex items-center gap-2 bg-green-600 px-4 py-2 rounded text-sm"
+                    >
+                      <Save size={16} /> Save
+                    </button>
+                    <button
+                      onClick={() => {
+                        setEditData(selectedEntity);
+                        setIsEditing(false);
+                      }}
+                      className="flex items-center gap-2 text-white border border-white px-4 py-2 rounded text-sm"
+                    >
+                      <X size={16} /> Cancel
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => setIsEditing(true)}
+                      className="flex items-center gap-2 bg-primaryBlue text-white px-4 py-2 rounded text-sm"
+                    >
+                      <Pencil size={16} /> Edit
+                    </button>
+                    <button
+                      onClick={handleDelete}
+                      className="flex items-center gap-2 text-white border border-white px-4 py-2 rounded text-sm"
+                    >
+                      <Trash size={16} /> Delete
+                    </button>
+                  </>
+                )}
+              </div>
             )}
-        </>
-    );
+          </div>
+        </div>
+      )}
+    </>
+  );
 };

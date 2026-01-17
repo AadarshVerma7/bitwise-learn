@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { X } from "lucide-react";
-import StudyModeToggle from "../../course/v1/StudyModeToggle";
+import StudyModeToggle from "../../Course/v1/StudyModeToggle";
 import VideoSection from "./VideoSection";
 import NotesPanel from "./NotesPanel";
 import CourseMeta from "./CourseMeta";
@@ -26,7 +26,6 @@ export default function CourseStudyModeV1({
 
   return (
     <div className="relative min-h-screen bg-[#121313] p-4 flex flex-col gap-4 overflow-hidden">
-
       {/* OVERLAY */}
       {isOpen && (
         <div
@@ -59,9 +58,7 @@ export default function CourseStudyModeV1({
           </button>
         </div>
 
-        <div className="p-4 text-sm text-gray-400">
-          Sidebar content here
-        </div>
+        <div className="p-4 text-sm text-gray-400">Sidebar content here</div>
       </div>
 
       {/* TOP BAR */}

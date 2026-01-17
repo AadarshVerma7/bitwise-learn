@@ -1,0 +1,27 @@
+name: Server Code Integration
+on: [push]
+jobs:
+  build:
+    name: Fetch-code
+    runs-on: ubuntu-latest
+    steps:
+      - name: Execute remote SSH and fetch updates
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          port: ${{ secrets.PORT }}
+          script: |
+            ls 
+            cd bitwise-learn 
+            git pull origin main
+            cd apps/client 
+            bun install 
+            bun run build
+            pm2 restart bitwise-frontend 
+            cd ../server 
+            bun install 
+            cd ../../packages/db
+            bunx prisma generate
+            pm2 restart bitwise-backend
