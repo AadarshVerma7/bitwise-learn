@@ -1,10 +1,15 @@
-import React from 'react'
 import CourseBuilderV1 from './v1/CourseBuilderV1'
 
-const CourseBuilder = () => {
+type PageProps = {
+  params:{
+    id:string;
+  };
+};
+
+const CourseBuilder = ({params}:PageProps) => {
   return (
     <div>
-        <CourseBuilderV1 />
+        <CourseBuilderV1 courseId={params.id} />
     </div>
   )
 }

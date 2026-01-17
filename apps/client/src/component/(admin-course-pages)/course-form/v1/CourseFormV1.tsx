@@ -5,21 +5,20 @@ import { useState } from "react";
 import { createCourse } from "@/api/courses/create-course";
 import { useRouter } from "next/navigation";
 import { X } from "lucide-react";
-
 type CourseFormData = {
   name: string;
   description: string;
-  level: "BASIC" | "INTERMEDIATE" | "ADVANCED";
+  level: "BASIC" | "INTERMEDIATE" | "ADVANCE";
   duration: string;
   instructorName: string;
 };
 
 type CourseFormProps = {
   onClose: () => void;
+  onSuccess: () => void;
 };
 
-
-const CourseForm: React.FC<CourseFormProps> = ({ onClose }) => {
+const CourseForm: React.FC<CourseFormProps> = ({ onClose, onSuccess }) => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
@@ -38,22 +37,20 @@ const CourseForm: React.FC<CourseFormProps> = ({ onClose }) => {
     formData.instructorName.trim();
 
   const handleSubmit = async () => {
+    if (loading) return;
+
     try {
       setLoading(true);
 
-      const res = await createCourse({
-        name: formData.name,
-        description: formData.description,
+      await createCourse({
+        name: formData.name.trim(),
+        description: formData.description.trim(),
         level: formData.level,
-        duration: formData.duration,
-        instructorName: formData.instructorName,
+        duration: formData.duration.trim(),
+        instructorName: formData.instructorName.trim(),
       });
-
-      console.log(res)
-
-      // router.push("/admin-dashboard/courses");
-      onClose();
-    } catch (error) {
+      onSuccess();
+    } catch (error: any) {
       console.error("Course creation failed", error);
     } finally {
       setLoading(false);
@@ -98,9 +95,10 @@ const CourseForm: React.FC<CourseFormProps> = ({ onClose }) => {
 
         {/* Level */}
         <div className="grid grid-cols-3 gap-4">
-          {["BASIC", "INTERMEDIATE", "ADVANCED"].map((lvl) => (
+          {["BASIC", "INTERMEDIATE", "ADVANCE"].map((lvl) => (
             <button
               key={lvl}
+              type="button"
               onClick={() =>
                 setFormData({
                   ...formData,

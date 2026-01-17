@@ -33,7 +33,7 @@ router.get(
   authMiddleware,
   courseController.getAllCoursesByAdmin
 );
-router.get("/get-course-by-id/:id", courseController.getCourseById);
+router.get("/get-course-by-id/:id", authMiddleware,courseController.getCourseById);
 router.delete(
   "/delete-course/:id",
   authMiddleware,

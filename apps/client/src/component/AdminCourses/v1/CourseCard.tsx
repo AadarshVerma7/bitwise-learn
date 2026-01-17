@@ -15,7 +15,7 @@ const colors = {
 export type Course = {
   id: string;
   name: string;
-  level: "BASIC" | "INTERMEDIATE" | "ADVANCED" | "ALL";
+  level: "BASIC" | "INTERMEDIATE" | "ADVANCE" | "ALL";
   description: string;
   duration?: string;
   thumbnail?: string;
@@ -36,7 +36,7 @@ const CourseCard = ({ course }: CourseCardProps) => {
       ? "text-grey-300"
       : level === "INTERMEDIATE"
       ? "text-yellow-400"
-      : level === "ADVANCED"
+      : level === "ADVANCE"
       ? "text-red-400"
       : "text-gray-400";
 
