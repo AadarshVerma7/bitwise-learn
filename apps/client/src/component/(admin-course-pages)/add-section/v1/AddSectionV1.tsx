@@ -38,16 +38,18 @@ type Section = {
 
 type AddSectionProps = {
   sectionNumber: number;
+  sectionData?: Section;
 };
 
 
 /* ================= COMPONENT ================= */
 
-const AddSectionV1 = ({ sectionNumber }: AddSectionProps) => {
+const AddSectionV1 = ({ sectionNumber,sectionData }: AddSectionProps) => {
   const [sectionCompleted, setSectionCompleted] = useState(false);
   const [sectionError, setSectionError] = useState<string | null>(null);
 
-  const [topics, setTopics] = useState<Topic[]>([
+  const [topics, setTopics] = useState<Topic[]>(
+    sectionData?.topics ?? [
     {
       id: 1,
       title: "",

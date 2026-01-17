@@ -1,20 +1,22 @@
-"use client"
+"use client";
 
-import SideBar from "@/component/general/SideBar"
-import CourseBuilder from "@/component/(admin-course-pages)/course-builder/CourseBuilder";
-import { useState } from "react";
+import React from "react";
+import SideBar from "@/component/general/SideBar";
+import CourseBuilderV1 from "@/component/(admin-course-pages)/course-builder/v1/CourseBuilderV1";
 
-export default function AdminCourse() {
+type PageProps = {
+  params: Promise<{ id: string }>;
+};
 
-    return (
-        <div className="flex h-screen overflow-hidden">
-            {/* Sidebar */}
-            <SideBar />
+export default function AdminCourse({ params }: PageProps) {
+  const { id } = React.use(params);
 
-            {/* Main Content */}
-            <main className="flex-1 overflow-y-auto px-10 py-10">
-                <CourseBuilder />
-            </main>
-        </div>
-    )
+  return (
+    <div className="flex h-screen overflow-hidden">
+      <SideBar />
+      <main className="flex-1 overflow-y-auto px-10 py-10">
+        <CourseBuilderV1 courseId={id} />
+      </main>
+    </div>
+  );
 }
