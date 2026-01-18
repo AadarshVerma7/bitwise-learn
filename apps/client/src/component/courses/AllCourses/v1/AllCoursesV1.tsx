@@ -7,74 +7,38 @@ import { Search, Clock, ChevronUp, ChevronDown } from "lucide-react";
 import SideBar from "@/component/general/SideBar";
 import Link from "next/link";
 import { useRef } from "react";
+import axiosInstance from "@/lib/axios";
 
 type CourseLevel = "Basic" | "Intermediate" | "Advanced" | "ALL";
 
 interface Course {
   id: string;
   name: string;
+  isPublished: string;
   description: string;
   level: CourseLevel;
   duration?: string;
-  thumbnail?: string;
+  thumbnail?: string | null;
   instructorName: string;
 }
 
-async function fetchCourses(): Promise<Course[]> {
-  return new Promise((resolve) =>
-    setTimeout(() => {
-      resolve([
-        {
-          id: "1",
-          name: "HTML Basics",
-          description: "Learn HTML from scratch.",
-          level: "Basic",
-          duration: "7d",
-          instructorName: "John Doe",
-        },
-        {
-          id: "2",
-          name: "CSS Intermediate",
-          description: "Layouts, Flexbox, Grid.",
-          level: "Intermediate",
-          duration: "10d",
-          instructorName: "Jane Smith",
-        },
-        {
-          id: "3",
-          name: "Advanced JS",
-          description: "Closures, performance, patterns.",
-          level: "Advanced",
-          duration: "14d",
-          instructorName: "Alex Ray",
-        },
-        {
-          id: "4",
-          name: "React Basics",
-          description: "Components & hooks.",
-          level: "Basic",
-          duration: "8d",
-          instructorName: "John Doe",
-        },
-        {
-          id: "5",
-          name: "Node Intermediate",
-          description: "APIs & Auth.",
-          level: "Intermediate",
-          duration: "12d",
-          instructorName: "Jane Smith",
-        },
-        {
-          id: "6",
-          name: "System Design",
-          description: "Scalable architectures.",
-          level: "Advanced",
-          duration: "15d",
-          instructorName: "Alex Ray",
-        },
-      ]);
-    }, 1200)
-  );
+export const getAllCourses = async () => {
+  const res = await axiosInstance.get("/api/course");
+  return res.data;
+};
+
+function normalizeLevel(level: string): CourseLevel {
+  switch (level) {
+    case "BASIC":
+      return "Basic";
+    case "INTERMEDIATE":
+      return "Intermediate";
+    case "ADVANCE":
+    case "ADVANCED":
+      return "Advanced";
+    default:
+      return "Basic";
+  }
 }
 
 function CourseCard({ course }: { course: Course }) {
@@ -84,8 +48,8 @@ function CourseCard({ course }: { course: Course }) {
     course.level === "Basic"
       ? "text-gray-300"
       : course.level === "Intermediate"
-      ? "text-yellow-400"
-      : "text-red-400";
+        ? "text-yellow-400"
+        : "text-red-400";
 
   return (
     <div
@@ -95,13 +59,13 @@ function CourseCard({ course }: { course: Course }) {
       border border-transparent hover:border-[#64ACFF]/40
       transition-all duration-300"
     >
-      <div className="rounded-lg overflow-hidden">
+      <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-black/20">
         <Image
           src={course.thumbnail || "/images/jsCard.jpg"}
           alt={course.name}
-          width={400}
-          height={200}
-          className="w-full h-auto"
+          fill
+          className="object-cover"
+          sizes="(max-width: 768px) 100vw, 33vw"
         />
       </div>
 
@@ -181,7 +145,6 @@ function NoCoursesFound() {
   );
 }
 
-
 export default function AllCoursesV1() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [search, setSearch] = useState("");
@@ -189,24 +152,53 @@ export default function AllCoursesV1() {
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
-  const [visibleCount,setVisibleCount] = useState(6);
+  const [visibleCount, setVisibleCount] = useState(6);
 
   useEffect(() => {
-    fetchCourses().then((data) => {
-      setCourses(data);
-      setLoading(false);
-    });
+    async function loadCourses() {
+      try {
+        setLoading(true);
+
+        const res = await getAllCourses();
+
+        const mappedCourses: Course[] = res.data.map((course: any) => ({
+          id: course.id,
+          name: course.name,
+          isPublished: course.isPublished,
+          description: course.description,
+          level: normalizeLevel(course.level),
+          duration: course.duration,
+          thumbnail: course.thumbnail,
+          instructorName: course.instructorName,
+        }));
+
+        const filteredCourses = mappedCourses.filter(
+          (course) => course.isPublished === "PUBLISHED",
+        );
+
+        setCourses(filteredCourses);
+      } catch (error) {
+        console.error("Failed to load courses", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadCourses();
   }, []);
 
-  useEffect(()=>{
-    function handleClickOutside(e:MouseEvent){
-      if(dropdownRef.current && !dropdownRef.current.contains(e.target as Node)){
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target as Node)
+      ) {
         setOpen(false);
       }
     }
-    document.addEventListener("mousedown",handleClickOutside);
-    return ()=>document.removeEventListener("mousedown",handleClickOutside);
-  },[]);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const filteredCourses = useMemo(() => {
     let data = courses.filter((c) => {
@@ -219,7 +211,7 @@ export default function AllCoursesV1() {
       return matchesSearch && matchesLevel;
     });
 
-    const order = { Basic: 1, Intermediate: 2, Advanced: 3,ALL : 0 };
+    const order = { Basic: 1, Intermediate: 2, Advanced: 3, ALL: 0 };
     data.sort((a, b) => order[a.level] - order[b.level]);
 
     return data;
@@ -272,28 +264,28 @@ export default function AllCoursesV1() {
         </header>
 
         <div className="flex mb-5 text-xl gap-1 items-center">
-            <Link href="/learning" className="font-semibold text-gray-400 hover:text-gray-300">
-              My Learnings
-            </Link>
-            <span className="text-primaryBlue text-6xl mb-3 font-light">
-              &gt;
-            </span>
-            <div className="font-light mb-1 text-4xl">
-              Courses
-            </div>
+          <Link
+            href="/learning"
+            className="font-semibold text-gray-400 hover:text-gray-300"
+          >
+            My Learnings
+          </Link>
+          <span className="text-primaryBlue text-6xl mb-3 font-light">
+            &gt;
+          </span>
+          <div className="font-light mb-1 text-4xl">Courses</div>
         </div>
 
         <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {loading ? (
-           Array.from({ length: 6 }).map((_, i) => (
-                <CourseSkeleton key={i} />
-              ))
-            ): filteredCourses.length===0?(
-              <NoCoursesFound />
-            ):(
+            Array.from({ length: 6 }).map((_, i) => <CourseSkeleton key={i} />)
+          ) : filteredCourses.length === 0 ? (
+            <NoCoursesFound />
+          ) : (
             filteredCourses.map((course) => (
-                <CourseCard key={course.id} course={course} />
-              )))}
+              <CourseCard key={course.id} course={course} />
+            ))
+          )}
         </section>
       </main>
     </div>
