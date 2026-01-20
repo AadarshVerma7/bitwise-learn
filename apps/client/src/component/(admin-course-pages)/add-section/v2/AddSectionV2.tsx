@@ -1,9 +1,11 @@
 "use client";
 
 import { Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { addContentToSection } from "@/api/courses/section/add-content-to-section";
 import toast from "react-hot-toast";
+import { updateContentToSection } from "@/api/courses/section/update-content-to-section";
+
 
 type Props = {
   sectionNumber: number;
@@ -18,6 +20,13 @@ type Props = {
     }[];
   };
 };
+
+type UpdateContentPayload={
+  name?:string;
+  description?:string;
+  transcript?:File | null;
+  videoUrl?:string;
+}
 
 
 // ------------------------ Add Topic Modal --------------------------
@@ -120,12 +129,179 @@ const AddTopicModal = ({
 };
 
 
+// -------------------------------- Update Topic Modal --------------------
+interface UpdateTopicModalProps {
+  open: boolean;
+  onClose: () => void;
+  initialData: {
+    name: string;
+    description: string;
+    videoUrl?: string;
+  };
+  onUpdate: (data: {
+    name: string;
+    description: string;
+    transcriptFile: File | null;
+    videoUrl: string;
+  }) => void;
+}
+const UpdateTopicModal = ({
+  open,
+  onClose,
+  initialData,
+  onUpdate,
+}: UpdateTopicModalProps) => {
+  const [name, setName] = useState(initialData.name);
+  const [description, setDescription] = useState(initialData.description);
+  const [videoUrl, setVideoUrl] = useState(initialData.videoUrl || "");
+  const [transcriptFile, setTranscriptFile] = useState<File | null>(null);
+
+  useEffect(() => {
+    if (open) {
+      setName(initialData.name);
+      setDescription(initialData.description);
+      setVideoUrl(initialData.videoUrl || "");
+      setTranscriptFile(null);
+    }
+  }, [open, initialData]);
+
+  if (!open) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+      <div className="w-full max-w-sm rounded-2xl bg-slate-900 border border-slate-800 p-6">
+        {/* Header */}
+        <h2 className="text-lg font-semibold text-white">
+          Update topic
+        </h2>
+
+        {/* Topic Name */}
+        <div className="mt-4">
+          <label className="text-sm text-slate-400">
+            Topic name
+          </label>
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="
+              mt-2 w-full rounded-lg
+              bg-slate-800 border border-slate-700
+              px-3 py-2 text-sm text-white
+              placeholder:text-slate-500
+              focus:outline-none focus:border-sky-500
+            "
+          />
+        </div>
+
+        {/* Description */}
+        <div className="mt-4">
+          <label className="text-sm text-slate-400">
+            Description
+          </label>
+          <textarea
+            rows={3}
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            className="
+              no-scrollbar
+              mt-2 w-full h-30 resize-none rounded-lg
+              bg-slate-800 border border-slate-700
+              px-3 py-2 text-sm text-white
+              placeholder:text-slate-500
+              focus:outline-none focus:border-sky-500
+            "
+          />
+        </div>
+
+        {/* Add Transcript */}
+        <div className="mt-4">
+          <label className="text-sm text-slate-400">
+            Add transcript 
+          </label>
+          <input
+            type="file"
+            accept=".txt,.pdf,.doc,.docx"
+            onChange={(e) =>
+              setTranscriptFile(e.target.files?.[0] || null)
+            }
+            className="
+              mt-2 w-full rounded-lg
+              bg-slate-800 border border-slate-700
+              px-3 py-2 text-sm text-slate-300
+              file:mr-3 file:rounded-md
+              file:border-0 file:bg-slate-700
+              file:px-3 file:py-1
+              file:text-sm file:text-white
+              hover:file:bg-slate-600
+            "
+          />
+        </div>
+
+        {/* Video URL */}
+        <div className="mt-4">
+          <label className="text-sm text-slate-400">
+            Video URL
+          </label>
+          <input
+            type="url"
+            value={videoUrl}
+            onChange={(e) => setVideoUrl(e.target.value)}
+            placeholder="https://youtube.com/..."
+            className="
+              mt-2 w-full rounded-lg
+              bg-slate-800 border border-slate-700
+              px-3 py-2 text-sm text-white
+              placeholder:text-slate-500
+              focus:outline-none focus:border-sky-500
+            "
+          />
+        </div>
+
+        {/* Actions */}
+        <div className="mt-6 flex justify-end gap-3">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition"
+          >
+            Cancel
+          </button>
+
+          <button
+            onClick={() => {
+              if (!name.trim() || !description.trim()) return;
+
+              onUpdate({
+                name: name.trim(),
+                description: description.trim(),
+                transcriptFile,
+                videoUrl: videoUrl.trim(),
+              });
+            }}
+            className="px-4 py-2 rounded-lg bg-emerald-500 text-black font-medium hover:bg-emerald-400 transition"
+          >
+            Update Topic
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
 // ------------------------------ Main Content ------------------------
 
 const AddSectionV2 = ({ sectionNumber, sectionData, sectionId }: Props) => {
 
   const [isAddTopicOpen, setIsAddTopicOpen] = useState(false);
   const topics = sectionData.courseLearningContents || [];
+  const [isUpdateTopicOpen, setIsUpdateTopicOpen] = useState(false);
+  const [selectedTopic, setSelectedTopic] = useState<{
+    id: string;
+    name: string;
+    description: string;
+  } | null>(null);
+
   return (
     <div className="relative text-white bg-divBg rounded-2xl px-6 py-4 border border-white/10">
       {/* Delete Section Button */}
@@ -152,15 +328,15 @@ const AddSectionV2 = ({ sectionNumber, sectionData, sectionId }: Props) => {
 
       {/* Topics list */}
       <div className="mt-4 space-y-3">
-  {topics.length === 0 ? (
-    <p className="text-sm text-slate-400">
-      No topics added yet
-    </p>
-  ) : (
-    topics.map((topic) => (
-      <div
-        key={topic.id}
-        className="
+        {topics.length === 0 ? (
+          <p className="text-sm text-slate-400">
+            No topics added yet
+          </p>
+        ) : (
+          topics.map((topic) => (
+            <div
+              key={topic.id}
+              className="
           group
           relative
           flex items-start justify-between
@@ -172,27 +348,27 @@ const AddSectionV2 = ({ sectionNumber, sectionData, sectionId }: Props) => {
           transition
           hover:bg-slate-900
         "
-      >
-        {/* Content */}
-        <div className="flex-1">
-          <p className="text-[15px] font-medium text-slate-100">
-            {topic.name}
-          </p>
+            >
+              {/* Content */}
+              <div className="flex-1">
+                <p className="text-[15px] font-medium text-slate-100">
+                  {topic.name}
+                </p>
 
-          {topic.description && (
-            <p className="mt-1 text-sm text-slate-400 leading-relaxed">
-              {topic.description}
-            </p>
-          )}
-        </div>
+                {topic.description && (
+                  <p className="mt-1 text-sm text-slate-400 leading-relaxed">
+                    {topic.description}
+                  </p>
+                )}
+              </div>
 
-        {/* Edit button */}
-        <button
-          onClick={() => {
-            // TODO: open edit topic modal
-            console.log("Edit topic:", topic.id);
-          }}
-          className="
+              {/* Edit button */}
+              <button
+                onClick={() => {
+                  setSelectedTopic(topic);
+                  setIsUpdateTopicOpen(true);
+                }}
+                className="
             opacity-0 group-hover:opacity-100
             transition
             rounded-md
@@ -204,13 +380,13 @@ const AddSectionV2 = ({ sectionNumber, sectionData, sectionId }: Props) => {
             hover:bg-slate-800
             hover:text-white
           "
-        >
-          Edit
-        </button>
+              >
+                Edit
+              </button>
+            </div>
+          ))
+        )}
       </div>
-    ))
-  )}
-</div>
 
 
 
@@ -250,6 +426,47 @@ const AddSectionV2 = ({ sectionNumber, sectionData, sectionId }: Props) => {
           }
         }}
       />
+
+
+      {/* --------------- Update topic Modal ------------ */}
+      {selectedTopic && (
+        <UpdateTopicModal
+          open={isUpdateTopicOpen}
+          onClose={() => {
+            setIsUpdateTopicOpen(false);
+            setSelectedTopic(null);
+          }}
+          initialData={{
+            name: selectedTopic.name,
+            description: selectedTopic.description,
+            videoUrl: "",
+          }}
+          onUpdate={async (data) => {
+            try {
+              console.log("UPDATE DATA", {
+                id: selectedTopic.id,
+                ...data,
+              });
+              await updateContentToSection(
+                selectedTopic.id,
+                {
+                  name: data.name,
+                  description: data.description,
+                  transcript: data.transcriptFile,
+                  videoUrl: data.videoUrl,
+                }
+              )
+              toast.success("Topic updated!");
+              setIsUpdateTopicOpen(false);
+              setSelectedTopic(null);
+            } catch (err) {
+              console.error(err);
+              toast.error("Failed to update topic");
+            }
+          }}
+        />
+      )}
+
     </div>
   );
 };

@@ -404,7 +404,7 @@ const CourseBuilderV1 = ({ courseId }: Props) => {
   ];
 
   return (
-    <div className="p-4 pt-0">
+    <div className="p-4 pt-0 ">
       {/*HIDDEN FILE INPUT */}
       <input
         ref={fileInputRef}
