@@ -95,7 +95,7 @@ export default function RightSection({
       </div>
 
       {/* Question Navigation */}
-      <div className="flex gap-2 overflow-x-auto mt-auto">
+      <div className="flex gap-2 overflow-x-auto mt-auto no-scrollbar">
         {Array.from({ length: totalQuestions }).map((_, i) => {
           const answered =
             userAnswers[questionIds[i]] != null;
