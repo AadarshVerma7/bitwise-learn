@@ -8,6 +8,7 @@ import { deleteSectionById } from "@/api/courses/section/delete-section";
 import { updateContentToSection } from "@/api/courses/section/update-content-to-section";
 import { uploadTranscript } from "@/api/courses/section/upload-transcript";
 import { deleteContentFromSection } from "@/api/courses/section/delete-content-from-section";
+import Link from 'next/link';
 
 type Props = {
   sectionNumber: number;
@@ -176,6 +177,7 @@ interface UpdateTopicModalProps {
     description: string;
     transcript: string;
     videoUrl?: string;
+    file:string;
   };
   onUpdate: (data: {
     name: string;
@@ -237,7 +239,7 @@ const UpdateTopicModal = ({
               onChange={(e) => setDescription(e.target.value)}
               className="mt-2 w-full resize-none rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-sm text-white focus:outline-none focus:border-sky-500"
             />
-          </div>
+          </div> 
 
           {/* Transcript Text */}
           <div className="col-span-2">
@@ -254,7 +256,10 @@ const UpdateTopicModal = ({
           </div>
 
           {/* Upload File */}
-          <div className="col-span-2">
+         
+          <div className="col-span-2 flex justify-between items-center">
+            <div>
+
             <label className="text-sm text-slate-400">Upload File</label>
             <input
               type="file"
@@ -263,7 +268,13 @@ const UpdateTopicModal = ({
               className="mt-2 w-full rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-sm text-slate-300
               file:mr-3 file:rounded-md file:border-0 file:bg-slate-700
               file:px-3 file:py-1 file:text-sm file:text-white hover:file:bg-slate-600"
-            />
+              />
+              </div>
+            {initialData.file && <div className="mt-4">
+          <Link href={initialData.file} target="_blank" className="text-sm bg-blue-700 p-3 rounded-md text-wrap">
+            Previous File
+          </Link>
+          </div>}
           </div>
 
           {/* Video URL */}
@@ -528,7 +539,8 @@ const AddSectionV2 = ({
             name: selectedTopic.name,
             description: selectedTopic.description,
             transcript: selectedTopic.transcript,
-            videoUrl: "",
+            videoUrl: selectedTopic.videoUrl,
+            file:selectedTopic.file
           }}
           onUpdate={async (data) => {
             const toastId = toast.loading("Updating Topic...");
