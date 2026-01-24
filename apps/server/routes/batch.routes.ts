@@ -20,18 +20,18 @@ const router = Router();
 router.post("/create-batch", authMiddleware, batchController.createBatch);
 router.get("/get-all-batch", authMiddleware, batchController.getAllBatches);
 router.get(
-    "/get-batch-by-id/:id",
-    authMiddleware,
-    batchController.getBatchById
+  "/get-batch-by-id/:id",
+  authMiddleware,
+  batchController.getBatchById,
 );
 router.put(
-    "/update-batch-by-id/:id",
-    authMiddleware,
-    batchController.updateBatch
+  "/update-batch-by-id/:id",
+  authMiddleware,
+  batchController.updateBatch,
 );
 router.delete(
-    "/delete-batch-by-id/:id",
-    authMiddleware,
-    batchController.deleteBatch
+  "/delete-batch-by-id/:id",
+  authMiddleware,
+  batchController.deleteBatch,
 );
 export default router;
