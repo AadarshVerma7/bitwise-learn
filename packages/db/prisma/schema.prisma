@@ -87,9 +87,9 @@ model Institution {
   websiteLink          String
   loginPassword        String
   email                String             @unique
-  secondaryEmail       String?            @unique
+  secondaryEmail       String?
   phoneNumber          String             @unique
-  secondaryPhoneNumber String?            @unique
+  secondaryPhoneNumber String?
   createdBy            String             @db.ObjectId
   creator              User               @relation(references: [id], fields: [createdBy])
   vendors              Vendor[]
