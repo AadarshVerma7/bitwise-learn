@@ -5,10 +5,10 @@ import { X } from "lucide-react";
 
 type Props = {
   openForm: (value: boolean) => void;
-  onSubmit?: (data: InstitutionFormData) => void;
+  onSubmit?: (data: VendorFormData) => void;
 };
 
-type InstitutionFormData = {
+type VendorFormData = {
   name: string;
   email: string;
   secondaryEmail?: string;
@@ -18,14 +18,13 @@ type InstitutionFormData = {
   pinCode: string;
   tagline: string;
   websiteLink: string;
-  loginPassword: string;
 };
 
-const TOTAL_STEPS = 4;
+const TOTAL_STEPS = 3;
 
 export default function VendorForm({ openForm, onSubmit }: Props) {
   const [step, setStep] = useState(1);
-  const [formData, setFormData] = useState<InstitutionFormData>({
+  const [formData, setFormData] = useState<VendorFormData>({
     name: "",
     email: "",
     secondaryEmail: "",
@@ -35,22 +34,117 @@ export default function VendorForm({ openForm, onSubmit }: Props) {
     pinCode: "",
     tagline: "",
     websiteLink: "",
-    loginPassword: "",
   });
+  const [errors, setErrors] = useState<Partial<Record<keyof VendorFormData, string>>>({});
+
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const validatePhoneNumber = (phone: string): boolean => {
+    const phoneRegex = /^[0-9]{10}$/;
+    return phoneRegex.test(phone);
+  };
+
+  const validatePinCode = (pinCode: string): boolean => {
+    const pinCodeRegex = /^[0-9]{6}$/;
+    return pinCodeRegex.test(pinCode);
+  };
+
+  const validateUrl = (url: string): boolean => {
+    try {
+      new URL(url);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const validateStep = (currentStep: number): boolean => {
+    const newErrors: Partial<Record<keyof VendorFormData, string>> = {};
+
+    if (currentStep === 1) {
+      if (!formData.name.trim()) {
+        newErrors.name = "Institution name is required";
+      } else if (formData.name.length < 3) {
+        newErrors.name = "Institution name must be at least 3 characters";
+      }
+
+      if (!formData.tagline.trim()) {
+        newErrors.tagline = "Tagline is required";
+      }
+
+      if (!formData.websiteLink.trim()) {
+        newErrors.websiteLink = "Website link is required";
+      } else if (!validateUrl(formData.websiteLink)) {
+        newErrors.websiteLink = "Please enter a valid URL";
+      }
+    }
+
+    if (currentStep === 2) {
+      if (!formData.email.trim()) {
+        newErrors.email = "Primary email is required";
+      } else if (!validateEmail(formData.email)) {
+        newErrors.email = "Please enter a valid email address";
+      }
+
+      if (formData.secondaryEmail && !validateEmail(formData.secondaryEmail)) {
+        newErrors.secondaryEmail = "Please enter a valid email address";
+      }
+
+      if (!formData.phoneNumber.trim()) {
+        newErrors.phoneNumber = "Phone number is required";
+      } else if (!validatePhoneNumber(formData.phoneNumber)) {
+        newErrors.phoneNumber = "Phone number must be 10 digits";
+      }
+
+      if (formData.secondaryPhoneNumber && !validatePhoneNumber(formData.secondaryPhoneNumber)) {
+        newErrors.secondaryPhoneNumber = "Phone number must be 10 digits";
+      }
+    }
+
+    if (currentStep === 3) {
+      if (!formData.address.trim()) {
+        newErrors.address = "Address is required";
+      } else if (formData.address.length < 10) {
+        newErrors.address = "Please enter a complete address";
+      }
+
+      if (!formData.pinCode.trim()) {
+        newErrors.pinCode = "Pin code is required";
+      } else if (!validatePinCode(formData.pinCode)) {
+        newErrors.pinCode = "Pin code must be 6 digits";
+      }
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    if (errors[name as keyof VendorFormData]) {
+      setErrors((prev) => ({ ...prev, [name]: undefined }));
+    }
   };
 
-  const next = () => setStep((s) => Math.min(s + 1, TOTAL_STEPS));
+  const next = () => {
+    if (validateStep(step)) {
+      setStep((s) => Math.min(s + 1, TOTAL_STEPS));
+    }
+  };
+
   const back = () => setStep((s) => Math.max(s - 1, 1));
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit?.(formData);
+    if (validateStep(step)) {
+      onSubmit?.(formData);
+    }
   };
 
   return (
@@ -91,18 +185,21 @@ export default function VendorForm({ openForm, onSubmit }: Props) {
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
+                error={errors.name}
               />
               <Input
                 label="Tagline"
                 name="tagline"
                 value={formData.tagline}
                 onChange={handleChange}
+                error={errors.tagline}
               />
               <Input
                 label="Website Link"
                 name="websiteLink"
                 value={formData.websiteLink}
                 onChange={handleChange}
+                error={errors.websiteLink}
               />
             </>
           )}
@@ -116,6 +213,7 @@ export default function VendorForm({ openForm, onSubmit }: Props) {
                 type="email"
                 value={formData.email}
                 onChange={handleChange}
+                error={errors.email}
               />
               <Input
                 label="Secondary Email"
@@ -123,20 +221,23 @@ export default function VendorForm({ openForm, onSubmit }: Props) {
                 type="email"
                 value={formData.secondaryEmail}
                 onChange={handleChange}
+                error={errors.secondaryEmail}
               />
               <Input
                 label="Phone Number"
                 name="phoneNumber"
-                type="number"
+                type="tel"
                 value={formData.phoneNumber}
                 onChange={handleChange}
+                error={errors.phoneNumber}
               />
               <Input
                 label="Secondary Phone"
                 name="secondaryPhoneNumber"
-                type="number"
+                type="tel"
                 value={formData.secondaryPhoneNumber}
                 onChange={handleChange}
+                error={errors.secondaryPhoneNumber}
               />
             </>
           )}
@@ -151,28 +252,24 @@ export default function VendorForm({ openForm, onSubmit }: Props) {
                   value={formData.address}
                   onChange={handleChange}
                   rows={3}
-                  className="mt-1 w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-primaryBlue"
+                  className={`mt-1 w-full rounded-lg border ${errors.address ? "border-red-500" : "border-white/10"
+                    } bg-black/30 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-primaryBlue`}
                 />
+                {errors.address && (
+                  <p className="mt-1 text-xs text-red-500">{errors.address}</p>
+                )}
               </div>
               <Input
                 label="Pin Code"
                 name="pinCode"
                 value={formData.pinCode}
                 onChange={handleChange}
+                error={errors.pinCode}
               />
             </>
           )}
 
-          {/* STEP 4 */}
-          {step === 4 && (
-            <Input
-              label="Login Password"
-              name="loginPassword"
-              type="password"
-              value={formData.loginPassword}
-              onChange={handleChange}
-            />
-          )}
+
 
           {/* Actions */}
           <div className="flex justify-between pt-4">
@@ -223,15 +320,18 @@ function Label({ children }: { children: React.ReactNode }) {
 
 function Input({
   label,
+  error,
   ...props
-}: React.InputHTMLAttributes<HTMLInputElement> & { label: string }) {
+}: React.InputHTMLAttributes<HTMLInputElement> & { label: string; error?: string }) {
   return (
     <div>
       <Label>{label}</Label>
       <input
         {...props}
-        className="mt-1 w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-primaryBlue"
+        className={`mt-1 w-full rounded-lg border ${error ? "border-red-500" : "border-white/10"
+          } bg-black/30 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-primaryBlue`}
       />
+      {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
     </div>
   );
 }

@@ -206,7 +206,6 @@ export interface CreateVendorBody {
   phoneNumber: string;
   secondaryPhoneNumber?: string;
   websiteLink: string;
-  loginPassword: string;
 }
 export interface UpdateVendorBody {
   name?: string;

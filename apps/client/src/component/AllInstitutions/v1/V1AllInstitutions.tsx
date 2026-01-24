@@ -5,7 +5,9 @@ import SideBar from "@/component/general/SideBar";
 import { useEffect, useState } from "react";
 import DashboardInfo from "./DashboardInfo";
 import { Plus } from "lucide-react";
-import VendorForm from "./VendorForm";
+import InstitutionForm from "./InstitutionForm";
+import { createInstitution } from "@/api/institutions/create-institution";
+import toast from "react-hot-toast";
 
 function V1AllInstitutions() {
   const [data, setData] = useState<any>([]);
@@ -14,9 +16,22 @@ function V1AllInstitutions() {
   useEffect(() => {
     getAllInstitutions(setData);
   }, []);
+
+  const handleCreateInstitution = async (data: any) => {
+    try {
+      await createInstitution(data);
+      setAddNew(false);
+      toast.success("Institute Created Successfully");
+      getAllInstitutions(setData);
+    } catch (err) {
+      toast.error("Error creating Institute");
+      console.error(err);
+    }
+  };
+
   return (
     <div className="flex">
-      {addNew && <VendorForm openForm={setAddNew} />}
+      {addNew && <InstitutionForm openForm={setAddNew} onSubmit={handleCreateInstitution} />}
       <div className="h-screen">
         <SideBar />
       </div>
