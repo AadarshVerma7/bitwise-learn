@@ -8,6 +8,7 @@ import SideBar from "@/component/general/SideBar";
 import Link from "next/link";
 import { useRef } from "react";
 import axiosInstance from "@/lib/axios";
+import StudentSideBar from "@/component/general/StudentSidebar";
 
 type CourseLevel = "Basic" | "Intermediate" | "Advanced" | "ALL";
 
@@ -219,7 +220,7 @@ export default function AllCoursesV1() {
 
   return (
     <div className="flex h-screen bg-[#0f0f0f] text-white">
-      <SideBar />
+      <StudentSideBar />
 
       <main className="flex-1 p-6 overflow-y-auto">
         <header className="flex items-center gap-10 mb-5">
