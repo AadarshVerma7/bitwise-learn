@@ -92,7 +92,8 @@ model Institution {
   secondaryPhoneNumber String?
   createdBy            String             @db.ObjectId
   creator              User               @relation(references: [id], fields: [createdBy])
-  vendors              Vendor[]
+  createdByVendorId    String?            @db.ObjectId
+  createdByVendor      Vendor?            @relation("VendorCreatedInstitutions", fields: [createdByVendorId], references: [id])
   batches              Batch[]
   teachers             Teacher[]
   students             Student[]
@@ -102,19 +103,18 @@ model Institution {
 }
 
 model Vendor {
-  id                   String      @id @default(auto()) @map("_id") @db.ObjectId
+  id                   String        @id @default(auto()) @map("_id") @db.ObjectId
   name                 String
   email                String
   secondaryEmail       String?
   tagline              String
   phoneNumber          String
   secondaryPhoneNumber String?
+  createdInstitutions  Institution[] @relation("VendorCreatedInstitutions")
   websiteLink          String
   loginPassword        String
-  institutionId        String      @db.ObjectId
-  creator              Institution @relation(references: [id], fields: [institutionId])
-  createdAt            DateTime    @default(now())
-  updatedAt            DateTime    @updatedAt
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
 }
 
 model Batch {
