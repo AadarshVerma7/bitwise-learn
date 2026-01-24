@@ -48,7 +48,7 @@ const RightSection = () => {
     try {
       setLoading(true);
       const data = await getAllCourses();
-      setCourses(data.data);
+      setCourses(data);
     } catch (error) {
       console.error("Failed to fetch courses", error);
       toast.error("Failed to fetch Courses");

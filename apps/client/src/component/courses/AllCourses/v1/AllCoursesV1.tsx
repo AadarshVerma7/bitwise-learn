@@ -160,8 +160,8 @@ export default function AllCoursesV1() {
         setLoading(true);
 
         const res = await getAllCourses();
-
-        const mappedCourses: Course[] = res.data.map((course: any) => ({
+        console.log(res);
+        const mappedCourses: Course[] = res.map((course: any) => ({
           id: course.id,
           name: course.name,
           isPublished: course.isPublished,
