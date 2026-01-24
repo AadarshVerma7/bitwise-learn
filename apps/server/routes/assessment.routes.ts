@@ -25,6 +25,11 @@ router.delete(
 );
 // assessment sections
 router.get(
+    "/get-sections-for-assessment/:id",
+    authMiddleware,
+    assessmentSectionController.getAllAssessmentSection
+);
+router.get(
     "/get-assessment-section/:id",
     authMiddleware,
     assessmentSectionController.getAllAssessmentSection

@@ -242,14 +242,14 @@
 //       setSections([]); 
 //     }
 //   };
-  
-  
+
+
 
 //   useEffect(() => {
 //     if (!assessmentId) return;
 //     fetchSections();
 //   }, [assessmentId]);
-  
+
 //   return (
 //     <div className="w-full">
 //       {/* Header */}

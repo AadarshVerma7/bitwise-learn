@@ -4,7 +4,7 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "bun index.ts"
+    "dev": "bun index.ts --watch"
   },
   "devDependencies": {
     "@types/axios": "^0.14.4",
