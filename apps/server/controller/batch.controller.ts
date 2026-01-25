@@ -127,9 +127,8 @@ class BatchController {
         throw new Error("only institution can view batches");
       }
 
-
       const institutions = await prismaClient.batch.findMany({
-        where: { institutionId: institutionId },
+        where: { institutionId: institutionId as string },
         select: {
           id: true,
           batchname: true,

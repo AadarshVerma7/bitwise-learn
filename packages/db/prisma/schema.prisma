@@ -151,7 +151,7 @@ model Teacher {
 model Student {
   id                          String                       @id @default(auto()) @map("_id") @db.ObjectId
   name                        String
-  rollNumber                  String                       @unique
+  rollNumber                  String
   email                       String                       @unique
   loginPassword               String
   batchId                     String                       @db.ObjectId
