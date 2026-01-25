@@ -1,32 +1,67 @@
 "use client";
 import CourseForm from "@/component/general/CourseForm";
 import TeacherForm from "@/component/general/TeacherForm";
+import BatchStudentForm from "./BatchStudentForm";
 import { Plus, X } from "lucide-react";
 import { useState } from "react";
-import StudentsForm from "./StudentsForm";
 import AssessmentsForm from "./AssessmentsForm";
-import { useParams } from "next/navigation";
-import CreateStudent from "@/component/CreateStudent/CreateStudent";
+
 type TabsProps = {
   value: string;
   onValueChange: (value: string) => void;
+  batchId: string;
+  batchName: string;
+  institutionId: string;
+  onStudentCreated?: () => void;
 };
-const RenderComponent = ({ value }: { value: string }) => {
-  const params = useParams();
+
+const RenderComponent = ({
+  value,
+  batchId,
+  batchName,
+  institutionId,
+  onClose,
+  onStudentCreated,
+}: {
+  value: string;
+  batchId: string;
+  batchName: string;
+  institutionId: string;
+  onClose: (value?: boolean) => void;
+  onStudentCreated?: () => void;
+}) => {
   switch (value) {
     case "Teachers":
-      return <TeacherForm />;
+      return <TeacherForm openForm={onClose} institutionId={institutionId || ""} />;
     case "Students":
-      return <CreateStudent />;
+      return (
+        <BatchStudentForm
+          openForm={onClose}
+          batchId={batchId}
+          batchName={batchName}
+          institutionId={institutionId}
+          onSubmit={() => {
+            onStudentCreated?.();
+          }}
+        />
+      );
     case "Courses":
-      return <CourseForm batchId={params.batchId as string} />;
+      return <CourseForm batchId={batchId} />;
     case "Assessments":
       return <AssessmentsForm />;
     default:
       return null;
   }
 };
-export const Tabs = ({ value, onValueChange }: TabsProps) => {
+
+export const Tabs = ({
+  value,
+  onValueChange,
+  batchId,
+  batchName,
+  institutionId,
+  onStudentCreated,
+}: TabsProps) => {
   const [addNew, setAddNew] = useState(false);
   const tabs = ["Students", "Teachers", "Assessments", "Courses"];
 
@@ -42,7 +77,14 @@ export const Tabs = ({ value, onValueChange }: TabsProps) => {
               <X />
             </button>
 
-            <RenderComponent value={value} />
+            <RenderComponent
+              value={value}
+              batchId={batchId}
+              batchName={batchName}
+              institutionId={institutionId}
+              onClose={() => setAddNew(false)}
+              onStudentCreated={onStudentCreated}
+            />
           </div>
         </div>
       )}
@@ -53,8 +95,8 @@ export const Tabs = ({ value, onValueChange }: TabsProps) => {
             key={tab}
             onClick={() => onValueChange(tab)}
             className={`px-4 py-1.5 rounded-md text-md ${value === tab
-                ? "bg-blue-500 text-white"
-                : "text-gray-400 hover:text-white"
+              ? "bg-blue-500 text-white"
+              : "text-gray-400 hover:text-white"
               }`}
           >
             {tab}

@@ -9,11 +9,14 @@ class StudentController {
   async createStudent(req: Request, res: Response) {
     try {
       if (!req.user) throw new Error("user is not authenticated");
-      const institutionId = req.user.id;
       const data: CreateStudentBody = req.body;
       if (!data) throw new Error("please provide all required fields");
 
-      if (req.user.type !== "INSTITUTION") {
+      const institutionId = data.institutionId;
+      if (!institutionId) {
+        throw new Error("institutionId is required");
+      }
+      if (req.user.type === "STUDENT") {
         throw new Error("only institution can create students");
       }
 

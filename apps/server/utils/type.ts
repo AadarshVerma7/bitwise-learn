@@ -229,6 +229,7 @@ export interface CreateStudentBody {
   rollNumber: string;
   email: string;
   loginPassword: string;
+  institutionId: string;
   batchId: string;
 }
 export interface UpdateStudentBody {

@@ -1,7 +1,16 @@
 import BatchesForm from "@/component/general/BatchesForm";
 import TeacherForm from "@/component/general/TeacherForm";
+import StudentForm from "@/component/general/StudentForm";
 import { Plus, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { getAllBatches } from "@/api/batches/get-all-batches";
+
+type Batch = {
+  id: string;
+  batchname: string;
+  branch: string;
+  batchEndYear: string;
+};
 
 type TabsProps = {
   value: string;
@@ -15,6 +24,7 @@ type RenderComponentProps = {
   institutionId: string;
   onClose: (value?: boolean) => void;
   onBatchCreated?: () => void;
+  batches?: Batch[];
 };
 
 const RenderComponent = ({
@@ -22,6 +32,7 @@ const RenderComponent = ({
   institutionId,
   onClose,
   onBatchCreated,
+  batches = [],
 }: RenderComponentProps) => {
   switch (value) {
     case "Teachers":
@@ -36,6 +47,17 @@ const RenderComponent = ({
           }}
         />
       );
+    case "Students":
+      return (
+        <StudentForm
+          openForm={onClose}
+          institutionId={institutionId}
+          batches={batches}
+          onSubmit={() => {
+            onBatchCreated?.();
+          }}
+        />
+      );
     default:
       return null;
   }
@@ -43,7 +65,18 @@ const RenderComponent = ({
 
 export const Tabs = ({ value, onValueChange, institutionId, onBatchCreated }: TabsProps) => {
   const [addNew, setAddNew] = useState(false);
-  const tabs = ["Teachers", "Batches"];
+  const [batches, setBatches] = useState<Batch[]>([]);
+  const tabs = ["Teachers", "Batches", "Students"];
+
+  useEffect(() => {
+    if (institutionId) {
+      getAllBatches((data: Batch[]) => {
+        setBatches(Array.isArray(data) ? data : []);
+      }, institutionId).catch(() => {
+        setBatches([]);
+      });
+    }
+  }, [institutionId]);
 
   return (
     <>
@@ -62,6 +95,7 @@ export const Tabs = ({ value, onValueChange, institutionId, onBatchCreated }: Ta
               institutionId={institutionId}
               onClose={() => setAddNew(false)}
               onBatchCreated={onBatchCreated}
+              batches={batches}
             />
           </div>
         </div>
@@ -74,8 +108,8 @@ export const Tabs = ({ value, onValueChange, institutionId, onBatchCreated }: Ta
               key={tab}
               onClick={() => onValueChange(tab)}
               className={`px-4 py-1.5 rounded-md text-md transition ${value === tab
-                  ? "bg-blue-500 text-white"
-                  : "text-gray-400 hover:text-white"
+                ? "bg-blue-500 text-white"
+                : "text-gray-400 hover:text-white"
                 }`}
             >
               {tab}
