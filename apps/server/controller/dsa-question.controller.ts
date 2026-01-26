@@ -229,6 +229,30 @@ class DsaQuestionController {
       return res.status(200).json(apiResponse(500, error.message, null));
     }
   }
+  async dsaProblemMatch(req: Request, res: Response) {
+    try {
+      const { query } = req.body;
+      if (!query) {
+        throw new Error("search string is required");
+      }
+
+      const response = await prismaClient.problem.findMany({
+        where: {
+          name: {
+            contains: query,
+            mode: "insensitive",
+          },
+        },
+      });
+
+      return res
+        .status(200)
+        .json(apiResponse(200, "fetched results", response));
+    } catch (error: any) {
+      console.log(error);
+      return res.status(200).json(apiResponse(500, error.message, null));
+    }
+  }
   //TODO: apply pagination here
   async getAdminDsaProblemById(req: Request, res: Response) {
     try {

@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import AddAssessmentCode from "./AddCODEAssessmentQuestion";
 import AddAssessmentMCQ from "./AddMCQAssessmentQuestion";
 
-
 // all the api's for this component
 import { createAssessmentSection } from "@/api/assessments/create-assessment-section";
 import { getAssessmentById } from "@/api/assessments/get-assessment-by-id";
@@ -47,6 +46,7 @@ type Question = {
   options: string[];
   correctOption: number;
   maxMarks: number;
+  problem?: { name: string; difficulty: string; id: string };
 };
 
 // -------------------------------------------------------------------------
@@ -82,9 +82,7 @@ const AddSectionModal = ({ open, onClose, onSubmit }: AddSectionModalProps) => {
           <input
             value={form.name}
             placeholder="XYZ Section..."
-            onChange={(e) =>
-              setForm({ ...form, name: e.target.value })
-            }
+            onChange={(e) => setForm({ ...form, name: e.target.value })}
             className="mt-1 w-full rounded-lg bg-slate-800 px-3 py-2 text-sm text-white border border-slate-700 outline-none"
           />
         </div>
@@ -200,9 +198,7 @@ const DeleteSectionModal = ({
       >
         {/* Header */}
         <div className="mb-5">
-          <h2 className="text-lg font-semibold text-white">
-            Delete section?
-          </h2>
+          <h2 className="text-lg font-semibold text-white">Delete section?</h2>
         </div>
 
         {/* Message */}
@@ -247,7 +243,6 @@ const DeleteSectionModal = ({
   );
 };
 
-
 // -------------------------------------------------------------------------
 // Delete Assessment Modal
 // -------------------------------------------------------------------------
@@ -274,7 +269,7 @@ const DeleteAssessmentModal = ({
       setLoading(true);
 
       await deleteAssessment(assessmentId);
-      console.log(assessmentId)
+      console.log(assessmentId);
 
       toast.success("Assessment deleted successfully");
       onDeleted();
@@ -394,18 +389,14 @@ const DeleteQuestionModal = ({
       >
         {/* Header */}
         <div className="mb-5">
-          <h2 className="text-lg font-semibold text-white">
-            Delete question?
-          </h2>
+          <h2 className="text-lg font-semibold text-white">Delete question?</h2>
         </div>
 
         {/* Message */}
         <div className="text-sm text-white/70 leading-relaxed">
           Are you sure you want to delete this question?
           <br />
-          <span className="text-white/40">
-            This action cannot be undone.
-          </span>
+          <span className="text-white/40">This action cannot be undone.</span>
         </div>
 
         {/* Divider */}
@@ -440,8 +431,6 @@ const DeleteQuestionModal = ({
     </div>
   );
 };
-
-
 
 // -------------------------------------------------------------------------
 // Update Section
@@ -496,9 +485,7 @@ const UpdateSectionModal = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
       <div className="w-full max-w-sm rounded-2xl bg-slate-900 border border-slate-800 p-6">
-        <h2 className="text-lg font-semibold text-white">
-          Edit section
-        </h2>
+        <h2 className="text-lg font-semibold text-white">Edit section</h2>
 
         <div className="mt-4">
           <label className="text-sm text-slate-400">Section name</label>
@@ -511,9 +498,7 @@ const UpdateSectionModal = ({
         </div>
 
         <div className="mt-4">
-          <label className="text-sm text-slate-400">
-            Marks per question
-          </label>
+          <label className="text-sm text-slate-400">Marks per question</label>
           <input
             type="number"
             min={1}
@@ -547,7 +532,6 @@ const UpdateSectionModal = ({
   );
 };
 
-
 // -------------------------------------------------------------------------
 // Update Question Modal (MCQ)
 // -------------------------------------------------------------------------
@@ -570,10 +554,10 @@ const UpdateQuestionModal = ({
   const [correct, setCorrect] = useState(0);
   const [marks, setMarks] = useState(1);
   const [loading, setLoading] = useState(false);
-
+  console.log(question);
   useEffect(() => {
     if (question) {
-      setText(question.question ?? "");
+      setText(question.question ?? question.problem?.name ?? "");
       setOptions(question.options);
       setCorrect(question.correctOption);
       setMarks(question.maxMarks);
@@ -607,18 +591,18 @@ const UpdateQuestionModal = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
       <div className="w-full max-w-lg rounded-xl border border-white/10 bg-[#121313] p-6">
-        <h2 className="text-lg font-semibold text-white mb-4">
-          Edit question
-        </h2>
+        <h2 className="text-lg font-semibold text-white mb-4">Edit question</h2>
 
         {/* Question */}
-        <textarea
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder="Question text"
-          className="w-full rounded-lg bg-[#181A1A] border border-white/10
+        {text && (
+          <textarea
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="Question text"
+            className="w-full rounded-lg bg-[#181A1A] border border-white/10
                      px-3 py-2 text-sm text-white outline-none mb-4"
-        />
+          />
+        )}
 
         {/* Options */}
         <div className="space-y-2">
@@ -681,14 +665,13 @@ const UpdateQuestionModal = ({
   );
 };
 
-
 // -------------------------------------------------------------------------
 // Publish Assessment Modal
 // -------------------------------------------------------------------------
 
 interface PublishAssessmentModalProps {
   open: boolean;
-  assessmentId: string; 
+  assessmentId: string;
   assessmentName?: string;
   onClose: () => void;
   onPublished: () => void;
@@ -786,8 +769,6 @@ const PublishAssessmentModal = ({
   );
 };
 
-
-
 // -------------------------------------------------------------------------
 // Main Builder
 // -------------------------------------------------------------------------
@@ -817,9 +798,10 @@ const AssessmentBuilderV1 = ({ assessmentId }: BuilderProps) => {
   const [showDeleteQuestion, setShowDeleteQuestion] = useState(false);
   const [deleteQuestionId, setDeleteQuestionId] = useState<string>("");
   const [showUpdateQuestion, setShowUpdateQuestion] = useState(false);
-  const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
+  const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(
+    null,
+  );
   const [showPublishModal, setShowPublishModal] = useState(false);
-
 
   const removeQuestionFromState = () => {
     setQuestionsBySection((prev) => {
@@ -827,7 +809,7 @@ const AssessmentBuilderV1 = ({ assessmentId }: BuilderProps) => {
 
       Object.keys(updated).forEach((sectionId) => {
         updated[sectionId] = updated[sectionId].filter(
-          (q) => q.id !== deleteQuestionId
+          (q) => q.id !== deleteQuestionId,
         );
       });
 
@@ -835,14 +817,13 @@ const AssessmentBuilderV1 = ({ assessmentId }: BuilderProps) => {
     });
   };
 
-
   const updateQuestionInState = (updated: Question) => {
     setQuestionsBySection((prev) => {
       const copy = { ...prev };
 
       Object.keys(copy).forEach((sectionId) => {
         copy[sectionId] = copy[sectionId].map((q) =>
-          q.id === updated.id ? updated : q
+          q.id === updated.id ? updated : q,
         );
       });
 
@@ -850,11 +831,8 @@ const AssessmentBuilderV1 = ({ assessmentId }: BuilderProps) => {
     });
   };
 
-
   const markAssessmentLive = () => {
-    setAssessmentData((prev) =>
-      prev ? { ...prev, status: "LIVE" } : prev
-    );
+    setAssessmentData((prev) => (prev ? { ...prev, status: "LIVE" } : prev));
   };
 
   const addQuestionToState = (sectionId: string, question: Question) => {
@@ -865,9 +843,6 @@ const AssessmentBuilderV1 = ({ assessmentId }: BuilderProps) => {
         : [question],
     }));
   };
-  
-
-
 
   const router = useRouter();
 
@@ -924,10 +899,11 @@ const AssessmentBuilderV1 = ({ assessmentId }: BuilderProps) => {
           <button
             disabled={assessmentData?.status === "LIVE"}
             onClick={() => setShowPublishModal(true)}
-            className={`rounded-md px-4 py-2 text-sm font-medium ${assessmentData?.status === "LIVE"
+            className={`rounded-md px-4 py-2 text-sm font-medium ${
+              assessmentData?.status === "LIVE"
                 ? "bg-slate-700 text-white/50 cursor-not-allowed"
                 : "bg-[#1DA1F2] text-black hover:bg-[#1DA1F2]/90"
-              }`}
+            }`}
           >
             {assessmentData?.status === "LIVE" ? "Live" : "Publish"}
           </button>
@@ -995,7 +971,8 @@ const AssessmentBuilderV1 = ({ assessmentId }: BuilderProps) => {
                     className="rounded-md border border-white/10 bg-[#181A1A]
                             px-3 py-2 text-sm text-white/80
                             hover:border-[#1DA1F2] hover:text-white
-                            transition">
+                            transition"
+                  >
                     Edit
                   </button>
 
@@ -1011,11 +988,11 @@ const AssessmentBuilderV1 = ({ assessmentId }: BuilderProps) => {
                     className="rounded-full border border-red-500/20 bg-red-500/10
                               px-2 py-2 text-sm text-red-400
                               hover:bg-red-500/20 hover:text-red-300
-                              transition">
+                              transition"
+                  >
                     <Trash className="h-4 w-4" />
                   </button>
                 </div>
-
               </div>
 
               {/* Questions */}
@@ -1031,7 +1008,8 @@ const AssessmentBuilderV1 = ({ assessmentId }: BuilderProps) => {
                       >
                         <div className="flex justify-between items-start">
                           <p className="text-sm font-medium text-white">
-                            {i + 1}. {q.question || "Code Question"}
+                            {i + 1}.{" "}
+                            {q.question || q.problem?.name || "Code Question"}
                           </p>
                           <div className="flex gap-2">
                             <button
@@ -1040,7 +1018,8 @@ const AssessmentBuilderV1 = ({ assessmentId }: BuilderProps) => {
                                 setSelectedQuestion(q);
                                 setShowUpdateQuestion(true);
                               }}
-                              className="px-3 py-1 text-xs rounded bg-slate-700 text-white">
+                              className="px-3 py-1 text-xs rounded bg-slate-700 text-white"
+                            >
                               Edit
                             </button>
 
@@ -1050,7 +1029,8 @@ const AssessmentBuilderV1 = ({ assessmentId }: BuilderProps) => {
                                 setDeleteQuestionId(q.id);
                                 setShowDeleteQuestion(true);
                               }}
-                              className="px-3 py-1 text-xs rounded bg-red-500/20 text-red-400">
+                              className="px-3 py-1 text-xs rounded bg-red-500/20 text-red-400"
+                            >
                               Delete
                             </button>
                           </div>
@@ -1065,9 +1045,10 @@ const AssessmentBuilderV1 = ({ assessmentId }: BuilderProps) => {
                               <div
                                 key={idx}
                                 className={`rounded-lg border px-3 py-2 text-xs flex items-center justify-between
-                                  ${isCorrect
-                                    ? "border-green-500 bg-green-500/10 text-green-400"
-                                    : "border-white/10 bg-[#121313] text-white/70"
+                                  ${
+                                    isCorrect
+                                      ? "border-green-500 bg-green-500/10 text-green-400"
+                                      : "border-white/10 bg-[#121313] text-white/70"
                                   }`}
                               >
                                 <span>{opt}</span>
@@ -1080,7 +1061,6 @@ const AssessmentBuilderV1 = ({ assessmentId }: BuilderProps) => {
                               </div>
                             );
                           })}
-
                         </div>
 
                         <p className="text-xs text-white/40">
@@ -1120,11 +1100,10 @@ const AssessmentBuilderV1 = ({ assessmentId }: BuilderProps) => {
         assessmentId={assessmentId}
         onClose={() => setShowDeleteAssessment(false)}
         onDeleted={() => {
-          router.push("/admin-dashboard/assessments")
+          router.push("/admin-dashboard/assessments");
           console.log("Assessment deleted");
         }}
       />
-
 
       {/* Modals */}
       <AddSectionModal
@@ -1142,14 +1121,13 @@ const AssessmentBuilderV1 = ({ assessmentId }: BuilderProps) => {
         sectionId={activeSectionId}
         maxMarks={sectionMarks}
         onClose={() => setShowAddMCQ(false)}
-        onCreated={(question) =>
-          addQuestionToState(activeSectionId, question)
-        }
+        onCreated={(question) => addQuestionToState(activeSectionId, question)}
       />
-
 
       <AddAssessmentCode
         open={showAddCODE}
+        sectionId={activeSectionId}
+        maxMarks={sectionMarks}
         onClose={() => setShowAddCODE(false)}
       />
 
@@ -1190,10 +1168,9 @@ const AssessmentBuilderV1 = ({ assessmentId }: BuilderProps) => {
         onUpdated={updateQuestionInState}
       />
 
-
       <PublishAssessmentModal
         open={showPublishModal}
-        assessmentId={assessmentId} 
+        assessmentId={assessmentId}
         assessmentName={assessmentData?.name}
         onClose={() => {
           setShowPublishModal(false);
@@ -1201,7 +1178,6 @@ const AssessmentBuilderV1 = ({ assessmentId }: BuilderProps) => {
         }}
         onPublished={markAssessmentLive}
       />
-
     </div>
   );
 };

@@ -58,7 +58,6 @@ class AssessmentQuestionController {
                 },
               },
               options: [],
-
             },
           });
       }
@@ -180,6 +179,19 @@ class AssessmentQuestionController {
       const questions = await prismaClient.assessmentQuestion.findMany({
         where: {
           sectionId: dbSection.id,
+        },
+        select: {
+          id: true,
+          maxMarks: true,
+          options: true,
+          question: true,
+          problem: {
+            select: {
+              name: true,
+              difficulty: true,
+              id: true,
+            },
+          },
         },
       });
 

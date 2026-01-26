@@ -19,6 +19,7 @@ problemsRouter.put(
   authMiddleware,
   dsaQuestionController.changePublishStatus,
 );
+problemsRouter.post("/search-question", dsaQuestionController.dsaProblemMatch);
 problemsRouter.get(
   "/get-dsa-problem/:id/",
   dsaQuestionController.getDsaProblemById,
