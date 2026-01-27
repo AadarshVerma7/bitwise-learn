@@ -6,8 +6,9 @@ async function seedData() {
     const runtimes: any[] = CHOSEN_LANGUAGES;
     for (const runtime of runtimes) {
       try {
+        console.log(process.env.CODE_EXECUTION_SERVER! + "api/v2/packages");
         const response = await axios.post(
-          process.env.CODE_EXECUTION_SERVER! + "/api/v2/packages",
+          process.env.CODE_EXECUTION_SERVER! + "api/v2/packages",
           {
             language: runtime.language,
             version: runtime.version,

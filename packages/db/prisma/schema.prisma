@@ -380,9 +380,8 @@ model Assessment {
   individualSectionTimeLimit Int?
   status                     ASSESSMENT_STATUS @default(UPCOMING)
   report                     String?
-
-  creatorId   String @db.ObjectId
-  creatorType String @default("ADMIN")
+  creatorId                  String            @db.ObjectId
+  creatorType                String            @default("ADMIN")
 
   batchId String @db.ObjectId
   batch   Batch  @relation(fields: [batchId], references: [id])
@@ -429,9 +428,9 @@ model AssessmentQuestion {
 model AssessmentSubmission {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  assessmentId String     @db.ObjectId
-  assessment   Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
-
+  assessmentId                  String                         @db.ObjectId
+  assessment                    Assessment                     @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  tabSwitchCount                Int                            @default(0)
   studentId                     String                         @db.ObjectId
   student                       Student                        @relation(fields: [studentId], references: [id])
   studentIp                     String

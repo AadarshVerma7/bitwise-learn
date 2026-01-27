@@ -5,7 +5,7 @@ export async function POST(req: NextRequest) {
   try {
     const backendUrl = process.env.BACKEND_URL;
     const data = await req.json();
-    console.log(backendUrl);
+
     if (!backendUrl) {
       return NextResponse.json(
         { error: "Backend URL not configured" },

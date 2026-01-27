@@ -50,7 +50,11 @@ export const VERSION_MAP: Record<string, string> = {
   java: "15.0.2",
   javascript: "20.11.1",
   python: "3.10.0",
-  rust: "1.68.2",
+  sqlite3: "3.36.0",
+  swift: "5.3.3",
+  kotlin: "1.8.20",
+  php: "8.2.3",
+  go: "1.16.2",
 };
 export const EXTENSION_MAP: Record<string, string> = {
   javascript: "js",
@@ -60,12 +64,16 @@ export const EXTENSION_MAP: Record<string, string> = {
   "c++": "cpp",
   csharp: "cs",
   java: "java",
-  rust: "rs",
   dart: "dart",
   elixir: "exs",
   matl: "m", // MATLAB
   cobal: "cob", // COBOL
   dash: "py", // Dash apps are Python-based
+  sqlite3: "sql", // or "db" depending on your use case
+  swift: "swift",
+  kotlin: "kt",
+  php: "php",
+  go: "go",
 };
 
 export const CHOSEN_LANGUAGES = [
@@ -144,8 +152,23 @@ export const CHOSEN_LANGUAGES = [
     aliases: ["py", "py3", "python3", "python3.10"],
   },
   {
-    language: "rust",
-    version: "1.68.2",
-    aliases: ["rs"],
+    language: "php",
+    version: "8.2.3",
+  },
+  {
+    language: "swift",
+    version: "5.3.3",
+  },
+  {
+    language: "sqlite3",
+    version: "3.36.0",
+  },
+  {
+    language: "kotlin",
+    version: "1.8.20",
+  },
+  {
+    language: "go",
+    version: "1.16.2",
   },
 ];

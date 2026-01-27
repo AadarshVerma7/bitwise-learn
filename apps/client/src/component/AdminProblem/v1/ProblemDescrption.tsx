@@ -6,7 +6,15 @@ import TestCaseSection from "@/component/Problem/v1/TestcaseSection";
 import MarkdownEditor, { THEME_MAP } from "@/component/ui/MarkDownEditor";
 import { changeStatus } from "@/api/problems/change-status";
 
-function ProblemDescrption({ data }: { data: any }) {
+function ProblemDescrption({
+  data,
+  testMode,
+  setTestMode,
+}: {
+  data: any;
+  testMode: boolean;
+  setTestMode: any;
+}) {
   if (!data) return null;
 
   const { name, description, hints, testCases, problemTopics } = data;
@@ -57,12 +65,39 @@ function ProblemDescrption({ data }: { data: any }) {
         onMouseDown={startResizing}
         className="absolute top-0 right-0 h-full w-1 cursor-col-resize bg-transparent hover:bg-blue-500/30"
       />
-      <button
-        onClick={() => handlePublish(data.id)}
-        className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
-      >
-        {data.published === "NOT_LISTED" ? "List Question" : "Remove Question"}
-      </button>
+      <div className="flex space-x-3">
+        <button
+          onClick={() => handlePublish(data.id)}
+          className={`w-full px-4 py-2 text-white font-medium rounded-lg transition-colors
+    ${
+      data.published === "NOT_LISTED"
+        ? "bg-blue-600 hover:bg-blue-700"
+        : "bg-red-600 hover:bg-red-700"
+    }`}
+        >
+          {data.published === "NOT_LISTED"
+            ? "List Question"
+            : "Remove Question"}
+        </button>
+        <label className="items-center gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={testMode}
+            onChange={() => setTestMode(!testMode)}
+            className="hidden"
+          />
+          <div
+            className={`w-10 h-5 rounded-full transition-colors
+      ${testMode ? "bg-green-500" : "bg-gray-300"}`}
+          >
+            <div
+              className={`w-4 h-4 bg-white rounded-full transform transition-transform
+        ${testMode ? "translate-x-5" : "translate-x-1"}`}
+            />
+          </div>
+          <span className="text-sm font-medium">Test Mode</span>
+        </label>
+      </div>
       {/* Problem Title */}
       <h1 className="text-xl font-semibold text-white">{name}</h1>
       {/* Problem Description */}

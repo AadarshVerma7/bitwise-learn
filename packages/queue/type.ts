@@ -11,4 +11,4 @@ export interface Queue {
   consumeFromQueue: (queueName: string, cb: HandlerCB) => Promise<void>;
 }
 
-export type HandlerCB = (msg: string) => any;
+export type HandlerCB = (msg: any) => any;
