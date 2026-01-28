@@ -67,6 +67,7 @@ export default function HeroSection() {
   }, []);
 
   useEffect(() => {
+    console.log(tabs);
     setFields(Object.keys(tabs));
   }, [tabs]);
 
@@ -158,7 +159,9 @@ function EntityTabs({ fields, data }: EntityTabsProps) {
                 <h3 className={`text-lg font-semibold ${Colors.text.primary}`}>
                   {meta.label}
                 </h3>
-                <p className={`text-sm mt-1 leading-snug ${Colors.text.secondary}`}>
+                <p
+                  className={`text-sm mt-1 leading-snug ${Colors.text.secondary}`}
+                >
                   {meta.tagline}
                 </p>
               </div>

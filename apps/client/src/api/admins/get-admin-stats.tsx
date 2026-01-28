@@ -5,5 +5,5 @@ export const getAllStats = async (stateFn: any) => {
     role: "admin",
   });
   console.log(data);
-  stateFn(data.data);
+  stateFn(data.data.overview);
 };
