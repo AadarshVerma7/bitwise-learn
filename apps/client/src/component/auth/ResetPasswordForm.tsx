@@ -39,6 +39,7 @@ interface ResetPasswordFormProps {
 /* ================= COMPONENT ================= */
 
 export default function ResetPasswordForm({
+    resetToken,
     role,
     onSuccess,
 }: ResetPasswordFormProps) {

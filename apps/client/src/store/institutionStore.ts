@@ -5,7 +5,7 @@ interface Institute {
   id: string;
   name: string;
   address: string;
-  pincode: string;
+  pinCode: string;
   tagline: string;
   websiteLink: string;
   phoneNumber: string;

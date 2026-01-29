@@ -8,9 +8,10 @@ import handleLogin from "@/api/handleLogin";
 import { useRouter } from "next/navigation";
 import { motion, type Variants } from "framer-motion";
 
-import ResetPasswordForm from "./ResetPasswordForm";
-import ForgotPasswordForm from "./ForgotPasswordForm";
-import OtpForm from "./OtpForm";
+import ResetPasswordForm from "@/component/auth/ResetPasswordForm";
+import ForgotPasswordForm from "@/component/auth/ForgotPasswordForm";
+import OtpForm from "@/component/auth/OtpForm";
+import { toast } from "react-hot-toast";
 
 /* ================= ANIMATION VARIANTS ================= */
 
@@ -109,6 +110,7 @@ export default function StudentLoginV1() {
       router.push("/dashboard");
     } catch (err) {
       console.error("Login failed", err);
+      toast.error("login failed");
     } finally {
       setLoading(false);
     }

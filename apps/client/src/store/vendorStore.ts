@@ -5,8 +5,6 @@ interface Vendor {
   email: string;
   id: string;
   name: string;
-  address: string;
-  pincode: string;
   tagline: string;
   websiteLink: string;
   phoneNumber: string;

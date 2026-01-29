@@ -7,7 +7,10 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import handleLogin from "@/api/handleLogin";
 import toast from "react-hot-toast";
-
+import { useRouter } from "next/dist/client/components/navigation";
+import ResetPasswordForm from "@/component/auth/ResetPasswordForm";
+import ForgotPasswordForm from "@/component/auth/ForgotPasswordForm";
+import OtpForm from "@/component/auth/OtpForm";
 /* ================= ANIMATION VARIANTS ================= */
 
 const pageFade = {
@@ -87,8 +90,10 @@ function WelcomeTypewriter() {
 }
 
 /* ================= MAIN COMPONENT ================= */
+const ROLE = "ADMIN" as const;
 
 export default function AdminLoginV1() {
+  const [step, setStep] = useState<"LOGIN" | "EMAIL" | "OTP" | "RESET">("LOGIN");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(false);
@@ -96,28 +101,21 @@ export default function AdminLoginV1() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   const isDisabled = !email || !password || loading;
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function fetchLoginData(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setError(null);
-    setLoading(true);
 
     try {
-      const payload = {
-        email,
-        password,
-        role: "ADMIN",
-      };
-
-      await handleLogin({ data: payload as any });
-
-      console.log("LOGIN PAYLOAD:", payload);
-      toast.success("login successfull");
+      setLoading(true);
+      await handleLogin({
+        data: { email, password, role: "ADMIN" },
+      });
+      router.push("/admin-dashboard");
     } catch (err) {
-      setError("Invalid email or password");
-      toast.error("login failed");
+      console.error("Login failed", err);
     } finally {
       setLoading(false);
     }
@@ -149,105 +147,104 @@ export default function AdminLoginV1() {
         </motion.div>
 
         <motion.div
+          key={step} // 🔥 THIS IS THE FIX
           variants={slideUp}
+          initial="hidden"
+          animate="show"
           className="relative w-full md:w-[60%] bg-divBg mt-10 md:mt-16 md:ml-16 rounded-3xl p-8"
         >
-          <h1 className="text-2xl font-bold mb-6">
-            <span className="text-white">Log</span>{" "}
-            <span className="text-primaryBlue">in</span>
-          </h1>
 
-          <motion.form
-            variants={stagger}
-            onSubmit={handleSubmit}
-            className="space-y-6"
-          >
-            {/* EMAIL */}
-            <motion.div variants={slideUp} className="flex flex-col space-y-1">
-              <label className="text-lg text-white">Email Address</label>
-              <div className="relative">
-                <Mail className="absolute top-1/2 left-3 -translate-y-1/2 text-white" />
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-12 py-2 pr-4 rounded-lg bg-bg text-white
-                  focus:ring-2 focus:ring-primaryBlue focus:ring-offset-2 outline-none
-                  focus:ring-offset-bg"
-                  placeholder="johndoe@example.com"
-                />
-              </div>
-            </motion.div>
+          {step === "LOGIN" && (
+            <>
+              <h1 className="text-2xl font-bold mb-6">
+                <span className="text-white">Log</span>{" "}
+                <span className="text-primaryBlue">in</span>
+              </h1>
 
-            {/* PASSWORD */}
-            <motion.div variants={slideUp}>
-              <label className="text-lg text-white">Password</label>
-              <div className="relative mt-1">
-                <Lock className="absolute top-1/2 left-3 -translate-y-1/2 text-white" />
-                <input
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-12 pr-10 py-2 rounded-lg bg-bg text-white
-                  focus:ring-2 focus:ring-primaryBlue focus:ring-offset-2 outline-none
-                  focus:ring-offset-bg"
-                  placeholder="••••••••"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((p) => !p)}
-                  className="absolute top-1/2 right-3 -translate-y-1/2 text-white"
+              <motion.form variants={stagger} onSubmit={fetchLoginData} className="space-y-6">
+                <motion.div variants={slideUp}>
+                  <label className="text-lg text-white">Email Address</label>
+                  <div className="relative">
+                    <div className="absolute top-1/2 left-3 -translate-y-1/2">
+                      <Mail size={24} color="white" />
+                    </div>
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="w-full pl-12 py-2 pr-4 rounded-lg bg-bg text-white"
+                      required
+                    />
+                  </div>
+                </motion.div>
+
+                <motion.div variants={slideUp}>
+                  <label className="text-lg text-white">Password</label>
+                  <div className="relative">
+                    <div className="absolute top-1/2 left-3 -translate-y-1/2">
+                      <Lock size={24} color="white" />
+                    </div>
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="w-full pl-12 py-2 pr-4 rounded-lg bg-bg text-white"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute top-1/2 right-3 -translate-y-1/2 text-white"
+                    >
+                      {showPassword ? <Eye size={17} /> : <EyeOff size={17} />}
+                    </button>
+                  </div>
+                </motion.div>
+
+                <motion.button
+                  variants={slideUp}
+                  type="submit"
+                  disabled={loading}
+                  className="w-full py-3 rounded-lg bg-primaryBlue text-white font-semibold"
                 >
-                  {showPassword ? <Eye size={17} /> : <EyeOff size={17} />}
-                </button>
-              </div>
-            </motion.div>
+                  {loading ? "Logging in..." : "Log in"}
+                </motion.button>
 
-            {/* REMEMBER */}
-            <motion.div variants={slideUp} className="flex items-center">
-              <label className="flex items-center space-x-2 text-white">
-                <input
-                  type="checkbox"
-                  checked={remember}
-                  onChange={(e) => setRemember(e.target.checked)}
-                  className="accent-primaryBlue"
-                />
-                <span>Remember me</span>
-              </label>
-            </motion.div>
+                <motion.button
+                  variants={slideUp}
+                  type="button"
+                  onClick={() => setStep("EMAIL")}
+                  className="text-sm text-neutral-300 hover:text-primaryBlue"
+                >
+                  Forgot Password?
+                </motion.button>
+              </motion.form>
+            </>
+          )}
+          {step === "EMAIL" && (
+            <ForgotPasswordForm
+              role={ROLE}
+              email={email}
+              setEmail={setEmail}
+              onSuccess={() => setStep("OTP")}
+              onBack={() => setStep("LOGIN")}
+            />
+          )}
 
-            {/* ERROR */}
-            {error && (
-              <motion.p
-                variants={slideUp}
-                className="text-red-400 text-sm bg-red-400/10 p-2 rounded-lg"
-              >
-                {error}
-              </motion.p>
-            )}
+          {step === "OTP" && (
+            <OtpForm
+              role={ROLE}
+              email={email}
+              onVerified={() => setStep("RESET")}
+            />
+          )}
 
-            {/* SUBMIT */}
-            <motion.button
-              variants={slideUp}
-              type="submit"
-              disabled={isDisabled}
-              className="w-full py-3 rounded-lg bg-primaryBlue
-              text-white text-lg font-semibold
-              hover:opacity-90 transition
-              disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? "Signing in..." : "Log in"}
-            </motion.button>
-
-            <motion.div variants={slideUp}>
-              <button
-                type="button"
-                className="text-sm text-neutral-300 hover:text-primaryBlue transition"
-              >
-                Forgot Password?
-              </button>
-            </motion.div>
-          </motion.form>
+          {step === "RESET" && (
+            <ResetPasswordForm
+              role={ROLE}
+              onSuccess={() => router.push("/admin-dashboard")}
+            />
+          )}
         </motion.div>
 
         <WelcomeTypewriter />

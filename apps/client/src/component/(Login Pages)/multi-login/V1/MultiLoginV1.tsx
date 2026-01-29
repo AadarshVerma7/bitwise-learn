@@ -14,9 +14,14 @@ import {
   Handshake,
 } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+
 import { motion } from "framer-motion";
 import handleLogin from "@/api/handleLogin";
 import toast from "react-hot-toast";
+import ResetPasswordForm from "@/component/auth/ResetPasswordForm";
+import ForgotPasswordForm from "@/component/auth/ForgotPasswordForm";
+import OtpForm from "@/component/auth/OtpForm";
 
 /* ================= ANIMATION VARIANTS ================= */
 
@@ -111,6 +116,7 @@ function WelcomeTypewriter() {
 /* ================= MAIN COMPONENT ================= */
 
 export default function AdminLoginV1() {
+  const [step, setStep] = useState<"LOGIN" | "EMAIL" | "OTP" | "RESET">("LOGIN");
   const [role, setRole] = useState<LoginRole>("TEACHER");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -119,6 +125,7 @@ export default function AdminLoginV1() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   const isDisabled = !email || !password || loading;
 
@@ -134,7 +141,9 @@ export default function AdminLoginV1() {
         role,
       };
 
-      const response = await handleLogin({ data: payload });
+      await handleLogin({
+        data: { email, password, role: role },
+      });
       toast.success("login successful");
     } catch (err) {
       setError("Invalid email or password");
@@ -154,112 +163,133 @@ export default function AdminLoginV1() {
           <span className="text-white">Learn</span>
         </h1>
 
-        <div className="relative w-full md:w-[60%] bg-divBg rounded-3xl p-8">
-          <h2 className="text-2xl font-bold mb-4">
-            <span className="text-white">Log</span>{" "}
-            <span className="text-primaryBlue">in</span>
-          </h2>
+        <motion.div
+          key={step} // 🔥 forces remount when step changes
+          variants={slideUp}
+          initial="hidden"
+          animate="show"
+          className="relative w-full md:w-[60%] bg-divBg rounded-3xl p-8"
+        >
+          {step === "LOGIN" && (
+            <>
+              <h2 className="text-2xl font-bold mb-4">
+                <span className="text-white">Log</span>{" "}
+                <span className="text-primaryBlue">in</span>
+              </h2>
 
-          {/* ROLE SELECT */}
-          <div className="flex gap-2 mb-6 bg-bg p-2 rounded-xl">
-            {[
-              { label: "TEACHER", icon: GraduationCap },
-              { label: "INSTITUTION", icon: School },
-              { label: "VENDOR", icon: Handshake },
-            ].map(({ label, icon: Icon }) => (
-              <button
-                key={label}
-                type="button"
-                onClick={() => setRole(label as LoginRole)}
-                className={`flex-1 py-2 rounded-lg flex items-center justify-center gap-2 text-sm font-medium transition
-                  ${
-                    role === label
-                      ? "bg-primaryBlue text-white"
-                      : "bg-[#3B82F6]/60 text-white hover:bg-[#3B82F6]"
-                  }`}
-              >
-                <Icon size={18} />
-                {label.toLowerCase()}
-              </button>
-            ))}
-          </div>
-
-          {/* FORM */}
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {/* EMAIL */}
-            <div>
-              <label className="text-white text-sm">Email Address</label>
-              <div className="relative mt-1">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-white" />
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-11 py-2 rounded-lg bg-bg text-white focus:ring-2 focus:ring-primaryBlue outline-none"
-                  placeholder="johndoe@example.com"
-                />
+              {/* ROLE SELECT */}
+              <div className="flex gap-2 mb-6 bg-bg p-2 rounded-xl">
+                {[
+                  { label: "TEACHER", icon: GraduationCap },
+                  { label: "INSTITUTION", icon: School },
+                  { label: "VENDOR", icon: Handshake },
+                ].map(({ label, icon: Icon }) => (
+                  <button
+                    key={label}
+                    type="button"
+                    onClick={() => setRole(label as LoginRole)}
+                    className={`flex-1 py-2 rounded-lg flex items-center justify-center gap-2 text-sm font-medium transition
+                  ${role === label
+                        ? "bg-primaryBlue text-white"
+                        : "bg-[#3B82F6]/60 text-white hover:bg-[#3B82F6]"
+                      }`}
+                  >
+                    <Icon size={18} />
+                    {label.toLowerCase()}
+                  </button>
+                ))}
               </div>
-            </div>
 
-            {/* PASSWORD */}
-            <div>
-              <label className="text-white text-sm">Password</label>
-              <div className="relative mt-1">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-white" />
-                <input
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-11 pr-10 py-2 rounded-lg bg-bg text-white focus:ring-2 focus:ring-primaryBlue outline-none"
-                  placeholder="••••••••"
-                />
+              {/* FORM */}
+              <form onSubmit={handleSubmit} className="space-y-5">
+                {/* EMAIL */}
+                <div>
+                  <label className="text-white text-sm">Email Address</label>
+                  <div className="relative mt-1">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-white" />
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="w-full pl-11 py-2 rounded-lg bg-bg text-white focus:ring-2 focus:ring-primaryBlue outline-none"
+                      placeholder="johndoe@example.com"
+                    />
+                  </div>
+                </div>
+
+                {/* PASSWORD */}
+                <div>
+                  <label className="text-white text-sm">Password</label>
+                  <div className="relative mt-1">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-white" />
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="w-full pl-11 pr-10 py-2 rounded-lg bg-bg text-white focus:ring-2 focus:ring-primaryBlue outline-none"
+                      placeholder="••••••••"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((p) => !p)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-white"
+                    >
+                      {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
+                    </button>
+                  </div>
+                </div>
+
+                {/* REMEMBER + ERROR */}
+                <div className="flex items-center justify-between text-sm">
+                  <label className="flex items-center gap-2 text-white">
+                    <input
+                      type="checkbox"
+                      checked={remember}
+                      onChange={(e) => setRemember(e.target.checked)}
+                      className="accent-primaryBlue"
+                    />
+                    Remember me
+                  </label>
+
+                  <button
+                    type="button"
+                    onClick={() => setStep("EMAIL")}
+                    className="text-neutral-300 hover:text-primaryBlue transition"
+                  >
+                    Forgot password?
+                  </button>
+                </div>
+
+                {error && (
+                  <p className="text-red-400 text-sm bg-red-400/10 p-2 rounded-lg">
+                    {error}
+                  </p>
+                )}
+
+                {/* SUBMIT */}
                 <button
-                  type="button"
-                  onClick={() => setShowPassword((p) => !p)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white"
-                >
-                  {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
-                </button>
-              </div>
-            </div>
-
-            {/* REMEMBER + ERROR */}
-            <div className="flex items-center justify-between text-sm">
-              <label className="flex items-center gap-2 text-white">
-                <input
-                  type="checkbox"
-                  checked={remember}
-                  onChange={(e) => setRemember(e.target.checked)}
-                  className="accent-primaryBlue"
-                />
-                Remember me
-              </label>
-
-              <button
-                type="button"
-                className="text-neutral-300 hover:text-primaryBlue transition"
-              >
-                Forgot password?
-              </button>
-            </div>
-
-            {error && (
-              <p className="text-red-400 text-sm bg-red-400/10 p-2 rounded-lg">
-                {error}
-              </p>
-            )}
-
-            {/* SUBMIT */}
-            <button
-              type="submit"
-              disabled={isDisabled}
-              className="w-full py-3 rounded-lg bg-primaryBlue text-white font-semibold
+                  type="submit"
+                  disabled={isDisabled}
+                  className="w-full py-3 rounded-lg bg-primaryBlue text-white font-semibold
               disabled:opacity-50 disabled:cursor-not-allowed transition"
-            >
-              {loading ? "Signing in..." : "Log in"}
-            </button>
-          </form>
-        </div>
+                >
+                  {loading ? "Signing in..." : "Log in"}
+                </button>
+              </form>
+            </>)}
+          {step === "EMAIL" && <ForgotPasswordForm role={role}
+
+            email={email}
+            setEmail={setEmail}
+            onSuccess={() => { setStep("OTP"); console.log(role); }}
+            onBack={() => setStep("LOGIN")} />}
+          {step === "OTP" && <OtpForm role={role}
+            email={email}
+            onVerified={() => setStep("RESET")} />}
+          {step === "RESET" && <ResetPasswordForm role={role}
+            onSuccess={() => router.push("/dashboard")} />}
+        </motion.div>
+
       </div>
 
       {/* RIGHT IMAGE */}

@@ -1,5 +1,5 @@
 export async function resetPassword(data: {
-    email: string;
+    newPassword: string;
     role: "STUDENT" | "INSTITUTION" | "ADMIN" | "VENDOR" | "TEACHER";
 }) {
     const res = await fetch("/api/auth/reset-password", {

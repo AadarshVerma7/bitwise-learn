@@ -231,6 +231,8 @@ class AuthController {
         select: {
           id: true,
           name: true,
+          email: true,
+          ROLE: true,
           password: false,
         },
       });
@@ -271,9 +273,14 @@ class AuthController {
       const dbInstitute = await prismaClient.institution.findUnique({
         where: { id: institution.id },
         select: {
-          loginPassword: false,
-          secondaryEmail: false,
-          secondaryPhoneNumber: false,
+          email: true,
+          id: true,
+          name: true,
+          address: true,
+          pinCode: true,
+          tagline: true,
+          websiteLink: true,
+          phoneNumber: true,
         },
       });
       return res
@@ -311,9 +318,12 @@ class AuthController {
       const dbVendor = await prismaClient.vendor.findUnique({
         where: { id: vendor.id },
         select: {
-          loginPassword: false,
-          secondaryEmail: false,
-          secondaryPhoneNumber: false,
+          email: true,
+          id: true,
+          name: true,
+          tagline: true,
+          websiteLink: true,
+          phoneNumber: true,
         },
       });
 

@@ -1,6 +1,6 @@
 export async function sendForgotPasswordOTP(data: {
   email: string;
-  role: "STUDENT";
+  role: "STUDENT" | "INSTITUTION" | "ADMIN" | "VENDOR" | "TEACHER";
 }) {
   const res = await fetch("/api/auth/forgot-password", {
     method: "POST",

@@ -1,6 +1,6 @@
 export async function verifyForgotPasswordOTP(data: {
     email: string;
-    role: "STUDENT";
+    otp: string;
 }) {
     const res = await fetch("/api/auth/verify-forgot-password", {
         method: "POST",

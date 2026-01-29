@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
       { email: data.email, password: data.password },
     );
 
-    (await cookies()).set("token", response.data.data.tokens, {
+    (await cookies()).set("token", response.data.data.tokens.accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       path: "/",
