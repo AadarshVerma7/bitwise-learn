@@ -1,4 +1,5 @@
 import axiosInstance from "@/lib/axios";
+import toast from "react-hot-toast";
 
 type AddAssignmentQuestionPayload = {
   assignmentId: string;
@@ -11,10 +12,14 @@ export const addAssignmentQuestion = async (
   assignmentId: string,
   payload: AddAssignmentQuestionPayload,
 ) => {
-  const res = await axiosInstance.post(
-    `/api/course/assignment-question/add/${assignmentId}`,
-    payload,
-  );
+  try {
+    const res = await axiosInstance.post(
+      `/api/course/assignment-question/add/${assignmentId}`,
+      payload,
+    );
 
-  return res.data;
+    return res.data;
+  } catch (error) {
+    toast.error("failed to add question");
+  }
 };

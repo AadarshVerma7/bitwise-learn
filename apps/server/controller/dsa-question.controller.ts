@@ -20,13 +20,29 @@ class DsaQuestionController {
     try {
       const userId = req.user?.id;
       const data: ProblemBody = req.body;
-      console.log(data);
+
       if (!userId) throw new Error("kindly Login");
       if (!data) throw new Error("data is required");
+      let dbAdmin;
+      let userType = req.user?.type;
+      if (userType === "ADMIN" || userType === "SUPERADMIN") {
+        dbAdmin = await prismaClient.user.findUnique({
+          where: { id: userId },
+        });
+      } else if (userType === "INSTITUTION") {
+        dbAdmin = await prismaClient.institution.findUnique({
+          where: { id: userId },
+        });
+      } else if (userType === "VENDOR") {
+        dbAdmin = await prismaClient.vendor.findUnique({
+          where: { id: userId },
+        });
+      } else if (userType === "TEACHER") {
+        dbAdmin = await prismaClient.teacher.findUnique({
+          where: { id: userId },
+        });
+      }
 
-      const dbAdmin = await prismaClient.user.findUnique({
-        where: { id: userId },
-      });
       if (!dbAdmin) throw new Error("no such admin found!");
 
       const dbProblem = await prismaClient.problem.findFirst({
@@ -42,6 +58,7 @@ class DsaQuestionController {
           hints: data.hints,
           difficulty: data.difficulty,
           createdBy: dbAdmin.id,
+          creatorType: req.user?.type as any,
         },
       });
 
@@ -64,19 +81,31 @@ class DsaQuestionController {
       if (!userId) throw new Error("kindly Login");
       if (!problemId) throw new Error("problemId is required");
       if (!data) throw new Error("data is required");
-
-      console.log("==========================");
-      console.log(data);
-      const dbAdmin = await prismaClient.user.findUnique({
-        where: { id: userId },
-      });
+      let dbAdmin;
+      let userType = req.user?.type;
+      if (userType === "ADMIN" || userType === "SUPERADMIN") {
+        dbAdmin = await prismaClient.user.findUnique({
+          where: { id: userId },
+        });
+      } else if (userType === "INSTITUTION") {
+        dbAdmin = await prismaClient.institution.findUnique({
+          where: { id: userId },
+        });
+      } else if (userType === "VENDOR") {
+        dbAdmin = await prismaClient.vendor.findUnique({
+          where: { id: userId },
+        });
+      } else if (userType === "TEACHER") {
+        dbAdmin = await prismaClient.teacher.findUnique({
+          where: { id: userId },
+        });
+      }
       if (!dbAdmin) throw new Error("no such admin found!");
 
       const dbProblem = await prismaClient.problem.findFirst({
         where: { id: problemId as string },
       });
       if (!dbProblem) throw new Error("problem doesn't exists");
-
       // create a transaction
       const udpatedProblem = await prismaClient.problem.update({
         where: { id: dbProblem.id },
@@ -105,16 +134,31 @@ class DsaQuestionController {
       if (!userId) throw new Error("kindly Login");
       if (!problemId) throw new Error("problemId is required");
 
-      const dbAdmin = await prismaClient.user.findUnique({
-        where: { id: userId },
-      });
+      let dbAdmin;
+      let userType = req.user?.type;
+      if (userType === "ADMIN" || userType === "SUPERADMIN") {
+        dbAdmin = await prismaClient.user.findUnique({
+          where: { id: userId },
+        });
+      } else if (userType === "INSTITUTION") {
+        dbAdmin = await prismaClient.institution.findUnique({
+          where: { id: userId },
+        });
+      } else if (userType === "VENDOR") {
+        dbAdmin = await prismaClient.vendor.findUnique({
+          where: { id: userId },
+        });
+      } else if (userType === "TEACHER") {
+        dbAdmin = await prismaClient.teacher.findUnique({
+          where: { id: userId },
+        });
+      }
       if (!dbAdmin) throw new Error("no such admin found!");
 
       const dbProblem = await prismaClient.problem.findFirst({
         where: { id: problemId as string },
       });
       if (!dbProblem) throw new Error("problem doesn't exists");
-
       const removedProblem = await prismaClient.problem.delete({
         where: { id: dbProblem.id },
       });
@@ -137,9 +181,25 @@ class DsaQuestionController {
       if (!userId) throw new Error("kindly Login");
       if (!problemId) throw new Error("problemId is required");
 
-      const dbAdmin = await prismaClient.user.findUnique({
-        where: { id: userId },
-      });
+      let dbAdmin;
+      let userType = req.user?.type;
+      if (userType === "ADMIN" || userType === "SUPERADMIN") {
+        dbAdmin = await prismaClient.user.findUnique({
+          where: { id: userId },
+        });
+      } else if (userType === "INSTITUTION") {
+        dbAdmin = await prismaClient.institution.findUnique({
+          where: { id: userId },
+        });
+      } else if (userType === "VENDOR") {
+        dbAdmin = await prismaClient.vendor.findUnique({
+          where: { id: userId },
+        });
+      } else if (userType === "TEACHER") {
+        dbAdmin = await prismaClient.teacher.findUnique({
+          where: { id: userId },
+        });
+      }
       if (!dbAdmin) throw new Error("no such admin found!");
 
       const dbProblem = await prismaClient.problem.findFirst({
@@ -202,7 +262,6 @@ class DsaQuestionController {
       });
 
       if (!dbProblem) throw new Error("db problem not found");
-
       const data = await prismaClient.problem.findUnique({
         where: { id: dbProblem.id },
         include: {
@@ -268,9 +327,25 @@ class DsaQuestionController {
 
       if (!dbProblem) throw new Error("db problem not found");
 
-      const dbAdmin = await prismaClient.user.findUnique({
-        where: { id: userId },
-      });
+      let dbAdmin;
+      let userType = req.user?.type;
+      if (userType === "ADMIN" || userType === "SUPERADMIN") {
+        dbAdmin = await prismaClient.user.findUnique({
+          where: { id: userId },
+        });
+      } else if (userType === "INSTITUTION") {
+        dbAdmin = await prismaClient.institution.findUnique({
+          where: { id: userId },
+        });
+      } else if (userType === "VENDOR") {
+        dbAdmin = await prismaClient.vendor.findUnique({
+          where: { id: userId },
+        });
+      } else if (userType === "TEACHER") {
+        dbAdmin = await prismaClient.teacher.findUnique({
+          where: { id: userId },
+        });
+      }
       if (!dbAdmin) throw new Error("no such admin found!");
       const data = await prismaClient.problem.findUnique({
         where: { id: dbProblem.id },
@@ -339,9 +414,25 @@ class DsaQuestionController {
       if (!problemId) throw new Error("problemId is required");
       if (!data) throw new Error("data is required");
 
-      const dbAdmin = await prismaClient.user.findUnique({
-        where: { id: userId },
-      });
+      let dbAdmin;
+      let userType = req.user?.type;
+      if (userType === "ADMIN" || userType === "SUPERADMIN") {
+        dbAdmin = await prismaClient.user.findUnique({
+          where: { id: userId },
+        });
+      } else if (userType === "INSTITUTION") {
+        dbAdmin = await prismaClient.institution.findUnique({
+          where: { id: userId },
+        });
+      } else if (userType === "VENDOR") {
+        dbAdmin = await prismaClient.vendor.findUnique({
+          where: { id: userId },
+        });
+      } else if (userType === "TEACHER") {
+        dbAdmin = await prismaClient.teacher.findUnique({
+          where: { id: userId },
+        });
+      }
       if (!dbAdmin) throw new Error("no such admin found!");
 
       const dbProblem = await prismaClient.problem.findFirst({
@@ -352,7 +443,6 @@ class DsaQuestionController {
       });
       if (!dbProblem) throw new Error("problem doesn't exists");
       if (dbProblem.problemTopics.length > 0) throw new Error("update topics");
-
       const createdProblemTopic = await prismaClient.problemTopic.create({
         data: {
           problemId: dbProblem.id,
@@ -375,16 +465,30 @@ class DsaQuestionController {
       const userId = req.user?.id;
       const problemTopicId = req.params.id;
       const data = req.body;
-      console.log("================================");
-      console.log(data);
 
       if (!userId) throw new Error("kindly Login");
       if (!problemTopicId) throw new Error("problemId is required");
       if (!data) throw new Error("data is required");
 
-      const dbAdmin = await prismaClient.user.findUnique({
-        where: { id: userId },
-      });
+      let dbAdmin;
+      let userType = req.user?.type;
+      if (userType === "ADMIN" || userType === "SUPERADMIN") {
+        dbAdmin = await prismaClient.user.findUnique({
+          where: { id: userId },
+        });
+      } else if (userType === "INSTITUTION") {
+        dbAdmin = await prismaClient.institution.findUnique({
+          where: { id: userId },
+        });
+      } else if (userType === "VENDOR") {
+        dbAdmin = await prismaClient.vendor.findUnique({
+          where: { id: userId },
+        });
+      } else if (userType === "TEACHER") {
+        dbAdmin = await prismaClient.teacher.findUnique({
+          where: { id: userId },
+        });
+      }
       if (!dbAdmin) throw new Error("no such admin found!");
 
       const dbProblemTopic = await prismaClient.problemTopic.findFirst({
@@ -417,9 +521,25 @@ class DsaQuestionController {
       if (!userId) throw new Error("kindly Login");
       if (!problemTopicId) throw new Error("problemId is required");
 
-      const dbAdmin = await prismaClient.user.findUnique({
-        where: { id: userId },
-      });
+      let dbAdmin;
+      let userType = req.user?.type;
+      if (userType === "ADMIN" || userType === "SUPERADMIN") {
+        dbAdmin = await prismaClient.user.findUnique({
+          where: { id: userId },
+        });
+      } else if (userType === "INSTITUTION") {
+        dbAdmin = await prismaClient.institution.findUnique({
+          where: { id: userId },
+        });
+      } else if (userType === "VENDOR") {
+        dbAdmin = await prismaClient.vendor.findUnique({
+          where: { id: userId },
+        });
+      } else if (userType === "TEACHER") {
+        dbAdmin = await prismaClient.teacher.findUnique({
+          where: { id: userId },
+        });
+      }
       if (!dbAdmin) throw new Error("no such admin found!");
 
       const dbProblemTopic = await prismaClient.problemTopic.findFirst({
@@ -453,9 +573,25 @@ class DsaQuestionController {
       if (!problemId) throw new Error("problemId is required");
       if (!data) throw new Error("data is required");
 
-      const dbAdmin = await prismaClient.user.findUnique({
-        where: { id: userId },
-      });
+      let dbAdmin;
+      let userType = req.user?.type;
+      if (userType === "ADMIN" || userType === "SUPERADMIN") {
+        dbAdmin = await prismaClient.user.findUnique({
+          where: { id: userId },
+        });
+      } else if (userType === "INSTITUTION") {
+        dbAdmin = await prismaClient.institution.findUnique({
+          where: { id: userId },
+        });
+      } else if (userType === "VENDOR") {
+        dbAdmin = await prismaClient.vendor.findUnique({
+          where: { id: userId },
+        });
+      } else if (userType === "TEACHER") {
+        dbAdmin = await prismaClient.teacher.findUnique({
+          where: { id: userId },
+        });
+      }
       if (!dbAdmin) throw new Error("no such admin found!");
 
       const dbProblem = await prismaClient.problem.findFirst({
@@ -465,7 +601,6 @@ class DsaQuestionController {
         },
       });
       if (!dbProblem) throw new Error("problem doesn't exists");
-
       const dbTemplate = await prismaClient.problemTemplate.findFirst({
         where: { problemId: dbProblem.id, language: data.language as any },
       });
@@ -501,9 +636,25 @@ class DsaQuestionController {
       if (!templateId) throw new Error("templateId is required");
       if (!data) throw new Error("data is required");
 
-      const dbAdmin = await prismaClient.user.findUnique({
-        where: { id: userId },
-      });
+      let dbAdmin;
+      let userType = req.user?.type;
+      if (userType === "ADMIN" || userType === "SUPERADMIN") {
+        dbAdmin = await prismaClient.user.findUnique({
+          where: { id: userId },
+        });
+      } else if (userType === "INSTITUTION") {
+        dbAdmin = await prismaClient.institution.findUnique({
+          where: { id: userId },
+        });
+      } else if (userType === "VENDOR") {
+        dbAdmin = await prismaClient.vendor.findUnique({
+          where: { id: userId },
+        });
+      } else if (userType === "TEACHER") {
+        dbAdmin = await prismaClient.teacher.findUnique({
+          where: { id: userId },
+        });
+      }
       if (!dbAdmin) throw new Error("no such admin found!");
 
       const dbTemplate = await prismaClient.problemTemplate.findFirst({
@@ -541,9 +692,25 @@ class DsaQuestionController {
       if (!userId) throw new Error("kindly Login");
       if (!problemId) throw new Error("problemId is required");
 
-      const dbAdmin = await prismaClient.user.findUnique({
-        where: { id: userId },
-      });
+      let dbAdmin;
+      let userType = req.user?.type;
+      if (userType === "ADMIN" || userType === "SUPERADMIN") {
+        dbAdmin = await prismaClient.user.findUnique({
+          where: { id: userId },
+        });
+      } else if (userType === "INSTITUTION") {
+        dbAdmin = await prismaClient.institution.findUnique({
+          where: { id: userId },
+        });
+      } else if (userType === "VENDOR") {
+        dbAdmin = await prismaClient.vendor.findUnique({
+          where: { id: userId },
+        });
+      } else if (userType === "TEACHER") {
+        dbAdmin = await prismaClient.teacher.findUnique({
+          where: { id: userId },
+        });
+      }
       if (!dbAdmin) throw new Error("no such admin found!");
 
       const dbProblem = await prismaClient.problem.findFirst({
@@ -553,7 +720,6 @@ class DsaQuestionController {
         },
       });
       if (!dbProblem) throw new Error("problem doesn't exists");
-
       const dbTemplate = await prismaClient.problemTemplate.findFirst({
         where: { problemId: dbProblem.id },
       });
@@ -584,9 +750,25 @@ class DsaQuestionController {
       if (!userId) throw new Error("kindly Login");
       if (!problemId) throw new Error("problemId is required");
 
-      const dbAdmin = await prismaClient.user.findUnique({
-        where: { id: userId },
-      });
+      let dbAdmin;
+      let userType = req.user?.type;
+      if (userType === "ADMIN" || userType === "SUPERADMIN") {
+        dbAdmin = await prismaClient.user.findUnique({
+          where: { id: userId },
+        });
+      } else if (userType === "INSTITUTION") {
+        dbAdmin = await prismaClient.institution.findUnique({
+          where: { id: userId },
+        });
+      } else if (userType === "VENDOR") {
+        dbAdmin = await prismaClient.vendor.findUnique({
+          where: { id: userId },
+        });
+      } else if (userType === "TEACHER") {
+        dbAdmin = await prismaClient.teacher.findUnique({
+          where: { id: userId },
+        });
+      }
       if (!dbAdmin) throw new Error("no such admin found!");
 
       const dbProblem = await prismaClient.problem.findFirst({
@@ -623,9 +805,25 @@ class DsaQuestionController {
       if (!problemId) throw new Error("problemId is required");
       if (!data) throw new Error("data is required");
 
-      const dbAdmin = await prismaClient.user.findUnique({
-        where: { id: userId },
-      });
+      let dbAdmin;
+      let userType = req.user?.type;
+      if (userType === "ADMIN" || userType === "SUPERADMIN") {
+        dbAdmin = await prismaClient.user.findUnique({
+          where: { id: userId },
+        });
+      } else if (userType === "INSTITUTION") {
+        dbAdmin = await prismaClient.institution.findUnique({
+          where: { id: userId },
+        });
+      } else if (userType === "VENDOR") {
+        dbAdmin = await prismaClient.vendor.findUnique({
+          where: { id: userId },
+        });
+      } else if (userType === "TEACHER") {
+        dbAdmin = await prismaClient.teacher.findUnique({
+          where: { id: userId },
+        });
+      }
       if (!dbAdmin) throw new Error("no such admin found!");
 
       const dbProblem = await prismaClient.problem.findFirst({
@@ -671,9 +869,25 @@ class DsaQuestionController {
       if (!testcaseId) throw new Error("problemId is required");
       if (!data) throw new Error("data is required");
 
-      const dbAdmin = await prismaClient.user.findUnique({
-        where: { id: userId },
-      });
+      let dbAdmin;
+      let userType = req.user?.type;
+      if (userType === "ADMIN" || userType === "SUPERADMIN") {
+        dbAdmin = await prismaClient.user.findUnique({
+          where: { id: userId },
+        });
+      } else if (userType === "INSTITUTION") {
+        dbAdmin = await prismaClient.institution.findUnique({
+          where: { id: userId },
+        });
+      } else if (userType === "VENDOR") {
+        dbAdmin = await prismaClient.vendor.findUnique({
+          where: { id: userId },
+        });
+      } else if (userType === "TEACHER") {
+        dbAdmin = await prismaClient.teacher.findUnique({
+          where: { id: userId },
+        });
+      }
       if (!dbAdmin) throw new Error("no such admin found!");
 
       const dbTestcase = await prismaClient.problemTestCase.findFirst({
@@ -708,9 +922,25 @@ class DsaQuestionController {
       if (!userId) throw new Error("kindly Login");
       if (!testcaseId) throw new Error("problemId is required");
 
-      const dbAdmin = await prismaClient.user.findUnique({
-        where: { id: userId },
-      });
+      let dbAdmin;
+      let userType = req.user?.type;
+      if (userType === "ADMIN" || userType === "SUPERADMIN") {
+        dbAdmin = await prismaClient.user.findUnique({
+          where: { id: userId },
+        });
+      } else if (userType === "INSTITUTION") {
+        dbAdmin = await prismaClient.institution.findUnique({
+          where: { id: userId },
+        });
+      } else if (userType === "VENDOR") {
+        dbAdmin = await prismaClient.vendor.findUnique({
+          where: { id: userId },
+        });
+      } else if (userType === "TEACHER") {
+        dbAdmin = await prismaClient.teacher.findUnique({
+          where: { id: userId },
+        });
+      }
       if (!dbAdmin) throw new Error("no such admin found!");
 
       const dbTestcase = await prismaClient.problemTestCase.findFirst({
@@ -740,9 +970,25 @@ class DsaQuestionController {
       if (!userId) throw new Error("kindly Login");
       if (!problemId) throw new Error("problemId is required");
 
-      const dbAdmin = await prismaClient.user.findUnique({
-        where: { id: userId },
-      });
+      let dbAdmin;
+      let userType = req.user?.type;
+      if (userType === "ADMIN" || userType === "SUPERADMIN") {
+        dbAdmin = await prismaClient.user.findUnique({
+          where: { id: userId },
+        });
+      } else if (userType === "INSTITUTION") {
+        dbAdmin = await prismaClient.institution.findUnique({
+          where: { id: userId },
+        });
+      } else if (userType === "VENDOR") {
+        dbAdmin = await prismaClient.vendor.findUnique({
+          where: { id: userId },
+        });
+      } else if (userType === "TEACHER") {
+        dbAdmin = await prismaClient.teacher.findUnique({
+          where: { id: userId },
+        });
+      }
       if (!dbAdmin) throw new Error("no such admin found!");
 
       const dbProblem = await prismaClient.problem.findFirst({
@@ -776,9 +1022,25 @@ class DsaQuestionController {
       if (!problemId) throw new Error("problemId is required");
       if (!data) throw new Error("data is required");
 
-      const dbAdmin = await prismaClient.user.findUnique({
-        where: { id: userId },
-      });
+      let dbAdmin;
+      let userType = req.user?.type;
+      if (userType === "ADMIN" || userType === "SUPERADMIN") {
+        dbAdmin = await prismaClient.user.findUnique({
+          where: { id: userId },
+        });
+      } else if (userType === "INSTITUTION") {
+        dbAdmin = await prismaClient.institution.findUnique({
+          where: { id: userId },
+        });
+      } else if (userType === "VENDOR") {
+        dbAdmin = await prismaClient.vendor.findUnique({
+          where: { id: userId },
+        });
+      } else if (userType === "TEACHER") {
+        dbAdmin = await prismaClient.teacher.findUnique({
+          where: { id: userId },
+        });
+      }
       if (!dbAdmin) throw new Error("no such admin found!");
 
       const dbProblem = await prismaClient.problem.findFirst({
@@ -818,9 +1080,25 @@ class DsaQuestionController {
       if (!problemId) throw new Error("problemId is required");
       if (!data) throw new Error("data is required");
 
-      const dbAdmin = await prismaClient.user.findUnique({
-        where: { id: userId },
-      });
+      let dbAdmin;
+      let userType = req.user?.type;
+      if (userType === "ADMIN" || userType === "SUPERADMIN") {
+        dbAdmin = await prismaClient.user.findUnique({
+          where: { id: userId },
+        });
+      } else if (userType === "INSTITUTION") {
+        dbAdmin = await prismaClient.institution.findUnique({
+          where: { id: userId },
+        });
+      } else if (userType === "VENDOR") {
+        dbAdmin = await prismaClient.vendor.findUnique({
+          where: { id: userId },
+        });
+      } else if (userType === "TEACHER") {
+        dbAdmin = await prismaClient.teacher.findUnique({
+          where: { id: userId },
+        });
+      }
       if (!dbAdmin) throw new Error("no such admin found!");
 
       const dbProblem = await prismaClient.problem.findFirst({
@@ -858,9 +1136,25 @@ class DsaQuestionController {
       if (!userId) throw new Error("kindly Login");
       if (!problemId) throw new Error("problemId is required");
 
-      const dbAdmin = await prismaClient.user.findUnique({
-        where: { id: userId },
-      });
+      let dbAdmin;
+      let userType = req.user?.type;
+      if (userType === "ADMIN" || userType === "SUPERADMIN") {
+        dbAdmin = await prismaClient.user.findUnique({
+          where: { id: userId },
+        });
+      } else if (userType === "INSTITUTION") {
+        dbAdmin = await prismaClient.institution.findUnique({
+          where: { id: userId },
+        });
+      } else if (userType === "VENDOR") {
+        dbAdmin = await prismaClient.vendor.findUnique({
+          where: { id: userId },
+        });
+      } else if (userType === "TEACHER") {
+        dbAdmin = await prismaClient.teacher.findUnique({
+          where: { id: userId },
+        });
+      }
       if (!dbAdmin) throw new Error("no such admin found!");
 
       const dbProblem = await prismaClient.problem.findFirst({
@@ -894,9 +1188,25 @@ class DsaQuestionController {
       if (!userId) throw new Error("kindly Login");
       if (!problemId) throw new Error("problemId is required");
 
-      const dbAdmin = await prismaClient.user.findUnique({
-        where: { id: userId },
-      });
+      let dbAdmin;
+      let userType = req.user?.type;
+      if (userType === "ADMIN" || userType === "SUPERADMIN") {
+        dbAdmin = await prismaClient.user.findUnique({
+          where: { id: userId },
+        });
+      } else if (userType === "INSTITUTION") {
+        dbAdmin = await prismaClient.institution.findUnique({
+          where: { id: userId },
+        });
+      } else if (userType === "VENDOR") {
+        dbAdmin = await prismaClient.vendor.findUnique({
+          where: { id: userId },
+        });
+      } else if (userType === "TEACHER") {
+        dbAdmin = await prismaClient.teacher.findUnique({
+          where: { id: userId },
+        });
+      }
       if (!dbAdmin) throw new Error("no such admin found!");
 
       const dbProblem = await prismaClient.problem.findFirst({
@@ -927,9 +1237,25 @@ class DsaQuestionController {
       if (!userId) throw new Error("kindly Login");
       if (!problemId) throw new Error("problemId is required");
 
-      const dbAdmin = await prismaClient.user.findUnique({
-        where: { id: userId },
-      });
+      let dbAdmin;
+      let userType = req.user?.type;
+      if (userType === "ADMIN" || userType === "SUPERADMIN") {
+        dbAdmin = await prismaClient.user.findUnique({
+          where: { id: userId },
+        });
+      } else if (userType === "INSTITUTION") {
+        dbAdmin = await prismaClient.institution.findUnique({
+          where: { id: userId },
+        });
+      } else if (userType === "VENDOR") {
+        dbAdmin = await prismaClient.vendor.findUnique({
+          where: { id: userId },
+        });
+      } else if (userType === "TEACHER") {
+        dbAdmin = await prismaClient.teacher.findUnique({
+          where: { id: userId },
+        });
+      }
       if (!dbAdmin) throw new Error("no such admin found!");
 
       const dbProblem = await prismaClient.problem.findFirst({

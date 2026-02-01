@@ -213,7 +213,7 @@ class AuthController {
       const admin = await prismaClient.user.findFirst({
         where: { email },
       });
-      console.log(admin);
+      console.log("admin fonud is : ", admin);
       if (!admin) throw new Error("invalid credentials");
       console.log("password is ", password);
       console.log("your password is ", admin.password);
@@ -409,7 +409,7 @@ class AuthController {
         id: student.id,
         type: "STUDENT",
       });
-       const dbStudent = await prismaClient.student.findUnique({
+      const dbStudent = await prismaClient.student.findUnique({
         where: { id: student.id },
         select: {
           email: true,
@@ -557,13 +557,11 @@ class AuthController {
 
       const resetToken = generateResetToken(email);
 
-      return res
-        .status(200)
-        .json(
-          apiResponse(200, "Forgot password OTP verified successfully", {
-            resetToken,
-          }),
-        );
+      return res.status(200).json(
+        apiResponse(200, "Forgot password OTP verified successfully", {
+          resetToken,
+        }),
+      );
     } catch (error: any) {
       res.status(500).json(apiResponse(500, error.message, error));
     }

@@ -4,12 +4,16 @@
 import { useEffect, useState } from "react";
 import { Search, Clock } from "lucide-react";
 import { motion } from "framer-motion";
-import { getAllAssessments } from "@/api/assessments/get-all-assessments";
+import {
+  getAllAssessments,
+  getAllStudentAssessment,
+} from "@/api/assessments/get-all-assessments";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 
 // colors ------------------------------------------------------------------
 import { useColors } from "@/component/general/(Color Manager)/useColors";
+import { useStudent } from "@/store/studentStore";
 const Colors = useColors();
 
 // types -------------------------------------------------------------------
@@ -203,11 +207,12 @@ const StudentAssesmentv1 = () => {
   const [searchText, setSearchText] = useState("");
   const [selectedAssessment, setSelectedAssessment] =
     useState<StudentAssessment | null>(null);
-
+  const { info: studentInfo } = useStudent();
   const fetchAssessments = async () => {
     try {
       setLoading(true);
-      const res = await getAllAssessments();
+      const batchId = studentInfo?.data.batch.id!;
+      const res = await getAllStudentAssessment(batchId as string);
 
       const normalizedData = (res.data || []).map((a: any) => ({
         ...a,
@@ -224,7 +229,7 @@ const StudentAssesmentv1 = () => {
 
   useEffect(() => {
     fetchAssessments();
-  }, []);
+  }, [studentInfo?.data.batch.id]);
 
   const liveAssessments = assessments.filter(
     (assessment) => assessment.status === "LIVE",

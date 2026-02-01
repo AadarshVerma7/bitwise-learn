@@ -1,16 +1,21 @@
 import axiosInstance from "@/lib/axios";
+import toast from "react-hot-toast";
 
 export const getAssignmentsBySection = async (
   sectionId: string,
   stateFn?: any,
 ) => {
-  const res = await axiosInstance.get(
-    `/api/course/assignment/get-all-section-assignments/${sectionId}`,
-  );
+  try {
+    const res = await axiosInstance.get(
+      `/api/course/assignment/get-all-section-assignments/${sectionId}`,
+    );
 
-  if (stateFn) {
-    stateFn(res.data);
+    if (stateFn) {
+      stateFn(res.data);
+    }
+
+    return res.data;
+  } catch (error: any) {
+    toast.error(error.message || "failed to get section");
   }
-
-  return res.data;
 };

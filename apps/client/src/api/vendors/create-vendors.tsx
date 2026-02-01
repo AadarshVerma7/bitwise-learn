@@ -1,4 +1,5 @@
 import axiosInstance from "@/lib/axios";
+import toast from "react-hot-toast";
 type CreateVendor = {
   name: string;
   email: string;
@@ -19,11 +20,14 @@ export const createVendors = async (payload: CreateVendor) => {
     secondaryPhoneNumber: payload.secondaryPhoneNumber,
     websiteLink: payload.websiteLink,
   };
+  try {
+    const response = await axiosInstance.post(
+      "/api/vendor/create-vendor",
+      requestBody,
+    );
 
-  const response = await axiosInstance.post(
-    "/api/vendor/create-vendor",
-    requestBody,
-  );
-
-  return response.data.data;
+    return response.data.data;
+  } catch (error) {
+    toast.error("failed to create vendors");
+  }
 };

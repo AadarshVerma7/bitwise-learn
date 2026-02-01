@@ -86,7 +86,7 @@ class InstitutionController {
       }
 
       const institution = await prismaClient.institution.findFirst({
-        where: { id: institutionId },
+        where: { id: institutionId as string },
       });
 
       if (!institution) throw new Error("institution not found");
@@ -100,7 +100,7 @@ class InstitutionController {
       }
 
       const updatedInstitution = await prismaClient.institution.update({
-        where: { id: institutionId },
+        where: { id: institutionId as string },
         data: {
           name: data.name ?? institution.name,
           email: data.email ?? institution.email,
@@ -160,12 +160,12 @@ class InstitutionController {
 
       const institution = await prismaClient.institution.findFirst({
         where: {
-          id: institutionId,
+          id: institutionId as string,
         },
       });
       if (!institution) throw new Error("institution not found");
       const deletedInstitution = await prismaClient.institution.delete({
-        where: { id: institutionId },
+        where: { id: institutionId as string },
       });
       if (!deletedInstitution) throw new Error("Error deleting institution");
 
@@ -183,49 +183,47 @@ class InstitutionController {
       return res.status(200).json(apiResponse(200, error.message, null));
     }
   }
-async getAllInstitutions(req: Request, res: Response) {
-  try {
-    if (!req.user) {
+  async getAllInstitutions(req: Request, res: Response) {
+    try {
+      if (!req.user) {
+        return res
+          .status(200)
+          .json(apiResponse(401, "user is not authenticated", null));
+      }
+
+      // Allow ADMIN, SUPERADMIN, VENDOR
+      if (
+        req.user.type !== "ADMIN" &&
+        req.user.type !== "SUPERADMIN" &&
+        req.user.type !== "VENDOR"
+      ) {
+        return res
+          .status(200)
+          .json(apiResponse(403, "not authorized to view institutions", null));
+      }
+
+      const institutions = await prismaClient.institution.findMany({
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          tagline: true,
+          phoneNumber: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
+
       return res
         .status(200)
-        .json(apiResponse(401, "user is not authenticated", null));
+        .json(
+          apiResponse(200, "institutions fetched successfully", institutions),
+        );
+    } catch (error: any) {
+      console.log(error);
+      return res.status(200).json(apiResponse(500, error.message, null));
     }
-
-    // Allow ADMIN, SUPERADMIN, VENDOR
-    if (
-      req.user.type !== "ADMIN" &&
-      req.user.type !== "SUPERADMIN" &&
-      req.user.type !== "VENDOR"
-    ) {
-      return res
-        .status(200)
-        .json(apiResponse(403, "not authorized to view institutions", null));
-    }
-
-    const institutions = await prismaClient.institution.findMany({
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        tagline: true,
-        phoneNumber: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
-
-    return res
-      .status(200)
-      .json(
-        apiResponse(200, "institutions fetched successfully", institutions),
-      );
-  } catch (error: any) {
-    console.log(error);
-    return res
-      .status(200)
-      .json(apiResponse(500, error.message, null));
   }
-}
 
   async getInstitutionById(req: Request, res: Response) {
     try {
@@ -247,7 +245,7 @@ async getAllInstitutions(req: Request, res: Response) {
 
       const institutions = await prismaClient.institution.findFirst({
         where: {
-          id: institutionId,
+          id: institutionId as string,
         },
         select: {
           id: true,
@@ -292,7 +290,7 @@ async getAllInstitutions(req: Request, res: Response) {
 
       const institute = await prismaClient.institution.findMany({
         where: {
-          createdBy: vendorId,
+          createdBy: vendorId as string,
         },
         select: {
           id: true,
@@ -316,100 +314,95 @@ async getAllInstitutions(req: Request, res: Response) {
     }
   }
 
-async getInstitutionDashboard(req: Request, res: Response) {
-  try {
-    if (!req.user) throw new Error("Unauthenticated user");
+  async getInstitutionDashboard(req: Request, res: Response) {
+    try {
+      if (!req.user) throw new Error("Unauthenticated user");
 
-    const user = await prismaClient.user.findUnique({
-      where: { id: req.user.id },
-    });
+      const user = await prismaClient.user.findUnique({
+        where: { id: req.user.id },
+      });
 
-    if (!user) throw new Error("User not found");
+      if (!user) throw new Error("User not found");
 
-    const institutionId = req.params.institutionId;
-    console.log(institutionId)
-    if (!institutionId) {
-      throw new Error("institutionId is required");
-    }
+      const institutionId = req.params.institutionId;
+      console.log(institutionId);
+      if (!institutionId) {
+        throw new Error("institutionId is required");
+      }
 
-    const institution = await prismaClient.institution.findUnique({
-      where: { id: institutionId },
-    });
+      const institution = await prismaClient.institution.findUnique({
+        where: { id: institutionId as string },
+      });
 
-    if (!institution) throw new Error("Institution not found");
+      if (!institution) throw new Error("Institution not found");
 
-    // FIX 2: correct access control (already right)
-    if (
-      user.ROLE !== "SUPERADMIN" &&
-      institution.createdBy !== user.id
-    ) {
-      throw new Error("You do not have access to this institution");
-    }
+      // FIX 2: correct access control (already right)
+      if (user.ROLE !== "SUPERADMIN" && institution.createdBy !== user.id) {
+        throw new Error("You do not have access to this institution");
+      }
 
-    const [batches, students, teachers, assessments, courses] =
-      await Promise.all([
-        prismaClient.batch.count({
-          where: { institutionId: institution.id },
-        }),
-        prismaClient.student.count({
-          where: { instituteId: institution.id },
-        }),
-        prismaClient.teacher.count({
-          where: { instituteId: institution.id },
-        }),
-        prismaClient.assessment.count({
-          where: {
-            batch: { institutionId: institution.id },
-          },
-        }),
-        prismaClient.courseEnrollment.count({
-          where: { institutionId: institution.id },
-        }),
-      ]);
+      const [batches, students, teachers, assessments, courses] =
+        await Promise.all([
+          prismaClient.batch.count({
+            where: { institutionId: institution.id },
+          }),
+          prismaClient.student.count({
+            where: { instituteId: institution.id },
+          }),
+          prismaClient.teacher.count({
+            where: { instituteId: institution.id },
+          }),
+          prismaClient.assessment.count({
+            where: {
+              batch: { institutionId: institution.id },
+            },
+          }),
+          prismaClient.courseEnrollment.count({
+            where: { institutionId: institution.id },
+          }),
+        ]);
 
-    const batchBreakdown = await prismaClient.batch.findMany({
-      where: { institutionId: institution.id },
-      select: {
-        id: true,
-        batchname: true,
-        branch: true,
-        batchEndYear: true,
-        _count: {
-          select: {
-            students: true,
-            teachers: true,
-            assessments: true,
+      const batchBreakdown = await prismaClient.batch.findMany({
+        where: { institutionId: institution.id },
+        select: {
+          id: true,
+          batchname: true,
+          branch: true,
+          batchEndYear: true,
+          _count: {
+            select: {
+              students: true,
+              teachers: true,
+              assessments: true,
+            },
           },
         },
-      },
-    });
+      });
 
-    return res.status(200).json(
-      apiResponse(200, "Institution dashboard data", {
-        institution: {
-          id: institution.id,
-          name: institution.name,
-          tagline: institution.tagline,
-          createdAt: institution.createdAt,
-        },
-        overview: {
-          batches,
-          students,
-          teachers,
-          courses,
-          assessments,
-        },
-        batches: batchBreakdown,
-      }),
-    );
-  } catch (error: any) {
-    console.error(error);
+      return res.status(200).json(
+        apiResponse(200, "Institution dashboard data", {
+          institution: {
+            id: institution.id,
+            name: institution.name,
+            tagline: institution.tagline,
+            createdAt: institution.createdAt,
+          },
+          overview: {
+            batches,
+            students,
+            teachers,
+            courses,
+            assessments,
+          },
+          batches: batchBreakdown,
+        }),
+      );
+    } catch (error: any) {
+      console.error(error);
 
-    // ✅ FIX 3: correct error status
-    return res.status(400).json(
-      apiResponse(400, error.message, null)
-    );
+      // ✅ FIX 3: correct error status
+      return res.status(400).json(apiResponse(400, error.message, null));
+    }
   }
-}
 }
 export default new InstitutionController();
