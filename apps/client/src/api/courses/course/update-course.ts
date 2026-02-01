@@ -1,4 +1,5 @@
 import axiosInstance from "@/lib/axios";
+import toast from "react-hot-toast";
 
 export const updateCourse = async (
   courseId: string,
@@ -9,10 +10,14 @@ export const updateCourse = async (
     level?: "BASIC" | "INTERMEDIATE" | "ADVANCE";
   },
 ) => {
-  const res = await axiosInstance.put(
-    `/api/course/update-course/${courseId}`,
-    payload,
-  );
+  try {
+    const res = await axiosInstance.put(
+      `/api/course/update-course/${courseId}`,
+      payload,
+    );
 
-  return res.data;
+    return res.data;
+  } catch (error) {
+    toast.error("failed to update course");
+  }
 };

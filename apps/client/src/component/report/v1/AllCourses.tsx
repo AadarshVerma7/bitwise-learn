@@ -1,10 +1,15 @@
 "use client";
 
-import { getAllCourses } from "@/api/courses/course/get-all-courses";
+import {
+  getAllCourses,
+  getInstitutionCourses,
+} from "@/api/courses/course/get-all-courses";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Search, Filter, CheckCircle, XCircle } from "lucide-react";
 import { useColors } from "@/component/general/(Color Manager)/useColors";
+import { useAdmin } from "@/store/adminStore";
+import { useInstitution } from "@/store/institutionStore";
 
 type Course = {
   id: string;
@@ -27,16 +32,28 @@ function AllCourses() {
 
   const router = useRouter();
   const Colors = useColors();
-
+  const { info: adminInfo } = useAdmin();
+  const { info: instutionInfo } = useInstitution();
   useEffect(() => {
     async function handleLoad() {
       setLoading(true);
-      const data = await getAllCourses(true);
-      setCourses(data);
+      let data;
+      if (adminInfo?.data.id) {
+        data = await getAllCourses(true);
+        setCourses(data);
+      } else {
+        console.log(instutionInfo);
+        if (!instutionInfo?.data.id) {
+          return;
+        }
+        data = await getInstitutionCourses(instutionInfo?.data.id as string);
+        console.log(data.data);
+        setCourses(data.data);
+      }
       setLoading(false);
     }
     handleLoad();
-  }, []);
+  }, [instutionInfo, adminInfo]);
 
   const uniqueLevels = useMemo(() => {
     return Array.from(new Set(courses.map((c) => c.level)));
@@ -58,11 +75,15 @@ function AllCourses() {
 
   return (
     <div className="space-y-4">
-      <div className={`flex flex-wrap gap-3 items-center justify-between rounded-lg p-4 ${Colors.background.primary} ${Colors.text.primary} ${Colors.border.defaultThin}`}>
+      <div
+        className={`flex flex-wrap gap-3 items-center justify-between rounded-lg p-4 ${Colors.background.primary} ${Colors.text.primary} ${Colors.border.defaultThin}`}
+      >
         <div className="flex items-center gap-3 flex-wrap">
           {/* Search */}
           <div className="relative">
-            <Search className={`absolute left-3 top-2.5 h-4 w-4 ${Colors.text.secondary}`} />
+            <Search
+              className={`absolute left-3 top-2.5 h-4 w-4 ${Colors.text.secondary}`}
+            />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -101,7 +122,9 @@ function AllCourses() {
         </div>
 
         {/* Right Info */}
-        <div className={`flex items-center gap-2 text-sm ${Colors.text.secondary}`}>
+        <div
+          className={`flex items-center gap-2 text-sm ${Colors.text.secondary}`}
+        >
           <Filter className="h-4 w-4" />
           {filteredCourses.length} results
         </div>
@@ -109,7 +132,9 @@ function AllCourses() {
 
       <div className="w-full overflow-x-auto">
         <table className={`w-full rounded-lg `}>
-          <thead className={`${Colors.background.primary} ${Colors.border.defaultThick}`}>
+          <thead
+            className={`${Colors.background.primary} ${Colors.border.defaultThick}`}
+          >
             <tr className={`text-left text-sm ${Colors.text.secondary}`}>
               <th className="px-4 py-3">Name</th>
               <th className="px-4 py-3">Instructor</th>
@@ -142,7 +167,9 @@ function AllCourses() {
                   key={course.id}
                   className={`border-b border-neutral-800 text-sm ${Colors.hover.special} transition ${Colors.background.secondary} `}
                 >
-                  <td className={`px-4 py-3 font-medium ${Colors.text.primary}`}>
+                  <td
+                    className={`px-4 py-3 font-medium ${Colors.text.primary}`}
+                  >
                     {course.name}
                   </td>
 
@@ -150,7 +177,9 @@ function AllCourses() {
                     {course.instructorName}
                   </td>
 
-                  <td className={`px-4 py-3 ${Colors.text.secondary}`}>{course.level}</td>
+                  <td className={`px-4 py-3 ${Colors.text.secondary}`}>
+                    {course.level}
+                  </td>
 
                   <td className={`px-4 py-3 ${Colors.text.secondary}`}>
                     {course.duration}
@@ -182,11 +211,11 @@ function AllCourses() {
 
                   <td className="px-4 py-3 text-right">
                     <button
-                      onClick={() =>
+                      onClick={() => {
                         router.push(
                           `/admin-dashboard/reports/courses/${course.id}`,
-                        )
-                      }
+                        );
+                      }}
                       className={`px-3 py-1.5 text-xs font-medium rounded-md cursor-pointer
                                  ${Colors.border.specialThin} ${Colors.hover.special}  ${Colors.text.special} transition`}
                     >

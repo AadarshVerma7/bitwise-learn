@@ -1,4 +1,5 @@
 import axiosInstance from "@/lib/axios";
+import toast from "react-hot-toast";
 
 type question = {
   question?: string;
@@ -9,18 +10,22 @@ type question = {
 };
 
 export const createQuestion = async (sectionId: string, payload: question) => {
-  const reqBody = {
-    question: payload.question || "",
-    options: payload.options || "",
-    correctOption: payload.correctOption || "",
-    problem: payload.problem || "",
-    maxMarks: payload.maxMarks,
-  };
+  try {
+    const reqBody = {
+      question: payload.question || "",
+      options: payload.options || "",
+      correctOption: payload.correctOption || "",
+      problem: payload.problem || "",
+      maxMarks: payload.maxMarks,
+    };
 
-  const response = await axiosInstance.post(
-    `/api/assessments/create-question/${sectionId}`,
-    reqBody,
-  );
+    const response = await axiosInstance.post(
+      `/api/assessments/create-question/${sectionId}`,
+      reqBody,
+    );
 
-  return response.data.data;
+    return response.data.data;
+  } catch (error) {
+    toast.error("error creating question");
+  }
 };

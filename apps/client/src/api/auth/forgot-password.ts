@@ -1,3 +1,5 @@
+import toast from "react-hot-toast";
+
 export async function sendForgotPasswordOTP(data: {
   email: string;
   role: "STUDENT" | "INSTITUTION" | "ADMIN" | "VENDOR" | "TEACHER";
@@ -11,9 +13,9 @@ export async function sendForgotPasswordOTP(data: {
   const result = await res.json();
 
   if (!res.ok) {
-    throw new Error(result.message || "Failed to send OTP");
+    // throw new Error(result.message || "Failed to send OTP");
+    toast.error(result.message || "failed to send OTP");
   }
 
   return result;
 }
-

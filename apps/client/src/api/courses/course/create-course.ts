@@ -1,4 +1,5 @@
 import axiosInstance from "@/lib/axios";
+import toast from "react-hot-toast";
 
 export const createCourse = async (
   payload: {
@@ -10,11 +11,15 @@ export const createCourse = async (
   },
   stateFn?: any,
 ) => {
-  const res = await axiosInstance.post("/api/course/create-course", payload);
+  try {
+    const res = await axiosInstance.post("/api/course/create-course", payload);
 
-  if (stateFn) {
-    stateFn(res.data);
+    if (stateFn) {
+      stateFn(res.data);
+    }
+
+    return res.data;
+  } catch (error) {
+    toast.error("failed to get create course");
   }
-
-  return res.data;
 };

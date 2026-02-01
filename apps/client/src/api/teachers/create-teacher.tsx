@@ -1,4 +1,5 @@
 import axiosInstance from "@/lib/axios";
+import toast from "react-hot-toast";
 
 export type CreateTeacherPayload = {
   name: string;
@@ -24,6 +25,7 @@ export const createTeacher = async (
     return response.data;
   } catch (error: any) {
     onError?.(error);
-    throw error;
+
+    toast.error("failed to create teacher");
   }
 };

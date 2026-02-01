@@ -1,16 +1,25 @@
 import axiosInstance from "@/lib/axios";
+import toast from "react-hot-toast";
 
 export const markAsDone = async (id: string) => {
-  const res = await axiosInstance.post("/api/course/change-status/" + id, {
-    currentStatus: "DONE",
-  });
+  try {
+    const res = await axiosInstance.post("/api/course/change-status/" + id, {
+      currentStatus: "DONE",
+    });
 
-  return res.data;
+    return res.data;
+  } catch (error) {
+    toast.error("failed to mark progress");
+  }
 };
 export const markAsUnDone = async (id: string) => {
-  const res = await axiosInstance.post("/api/course/change-status/" + id, {
-    currentStatus: "UN_DONE",
-  });
+  try {
+    const res = await axiosInstance.post("/api/course/change-status/" + id, {
+      currentStatus: "UN_DONE",
+    });
 
-  return res.data;
+    return res.data;
+  } catch (error) {
+    toast.error("failed to mark progress");
+  }
 };

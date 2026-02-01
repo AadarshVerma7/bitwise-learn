@@ -2,15 +2,15 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 interface Institute {
   data: {
-  email: string;
-  id: string;
-  name: string;
-  address: string;
-  pinCode: string;
-  tagline: string;
-  websiteLink: string;
-  phoneNumber: string;
-  }
+    email: string;
+    id: string;
+    name: string;
+    address: string;
+    pinCode: string;
+    tagline: string;
+    websiteLink: string;
+    phoneNumber: string;
+  };
 }
 interface InstituteStore {
   info: Institute | null;

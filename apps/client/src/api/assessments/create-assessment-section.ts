@@ -1,4 +1,5 @@
 import axiosInstance from "@/lib/axios";
+import toast from "react-hot-toast";
 
 type AssessmentSectionPayload = {
   name: string;
@@ -10,10 +11,14 @@ type AssessmentSectionPayload = {
 export const createAssessmentSection = async (
   payload: AssessmentSectionPayload,
 ) => {
-  const res = await axiosInstance.post(
-    "/api/assessments/create-assessment-section",
-    payload,
-  );
+  try {
+    const res = await axiosInstance.post(
+      "/api/assessments/create-assessment-section",
+      payload,
+    );
 
-  return res.data.data;
+    return res.data.data;
+  } catch (error) {
+    toast.error("error creating section");
+  }
 };

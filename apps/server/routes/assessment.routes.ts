@@ -24,6 +24,11 @@ router.get(
   AssessmentController.getAssessmentById,
 );
 router.get(
+  "/get-assessment-by-institution/:id",
+  authMiddleware,
+  AssessmentController.getAssessmentByInstitution,
+);
+router.get(
   "/get-assessment-by-batch/:id",
   authMiddleware,
   AssessmentController.getAssessmentsByBatch,

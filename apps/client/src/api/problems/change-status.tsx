@@ -1,8 +1,13 @@
 import axiosInstance from "@/lib/axios";
+import toast from "react-hot-toast";
 
 export async function changeStatus(problemId: string) {
-  const response = await axiosInstance.post(
-    "/api/admin/change-status/" + problemId,
-  );
-  return response.data;
+  try {
+    const response = await axiosInstance.post(
+      "/api/admin/change-status/" + problemId,
+    );
+    return response.data;
+  } catch (error) {
+    toast.error("failed to get change status");
+  }
 }

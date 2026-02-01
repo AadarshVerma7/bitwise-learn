@@ -40,6 +40,11 @@ router.get(
   courseController.getCourseById,
 );
 router.get(
+  "/get-course-by-institution/:id",
+  authMiddleware,
+  courseController.getCourseByInstitution,
+);
+router.get(
   "/get-all-sections-by-course/:id",
   authMiddleware,
   courseController.getAllSectionsByCourse,
@@ -211,6 +216,6 @@ router.delete(
 router.get(
   "/get-student-courses",
   authMiddleware,
-  courseController.getStudentCourses
-)
+  courseController.getStudentCourses,
+);
 export default router;

@@ -10,19 +10,8 @@ class AssessmentController {
       if (!req.user) throw new Error("User not authenticated");
       const data: CreateAssessment = req.body;
       if (!data) throw new Error("Please provide all fields");
-      if (
-        req.user.type !== "SUPERADMIN" &&
-        req.user.type !== "ADMIN" &&
-        req.user.type !== "INSTITUTION" &&
-        req.user.type !== "VENDOR"
-      )
+      if (req.user.type === "STUDENT")
         throw new Error("User Not Authorized to create Assessments");
-      // const existingAssessment = await prismaClient.assessment.findFirst({
-      //     where:{
-      //         name:data.name
-      //     }
-      // });
-      // if(existingAssessment)throw new Error("Assessment with this name already exists");
       const startTime = new Date(data.startTime);
       const endTime = new Date(data.endTime);
       if (isNaN(startTime.getTime()) || isNaN(endTime.getTime()))
@@ -63,12 +52,7 @@ class AssessmentController {
 
       if (!req.user) throw new Error("User not authenticated");
       if (!data) throw new Error("Please provide all fields");
-      if (
-        req.user.type !== "SUPERADMIN" &&
-        req.user.type !== "ADMIN" &&
-        req.user.type !== "INSTITUTION" &&
-        req.user.type !== "VENDOR"
-      )
+      if (req.user.type === "STUDENT")
         throw new Error("User Not Authorized to update Assessments");
 
       const assessment = await prismaClient.assessment.findFirst({
@@ -109,12 +93,7 @@ class AssessmentController {
     try {
       const assessmentId = req.params.id;
       if (!req.user) throw new Error("User not authenticated");
-      if (
-        req.user.type !== "SUPERADMIN" &&
-        req.user.type !== "ADMIN" &&
-        req.user.type !== "INSTITUTION" &&
-        req.user.type !== "VENDOR"
-      )
+      if (req.user.type === "STUDENT")
         throw new Error("User Not Authorized to delete Assessments");
 
       const assessment = await prismaClient.assessment.findFirst({
@@ -182,7 +161,8 @@ class AssessmentController {
         const batchStudent = await prisma.student.findUnique({
           where: { id: req.user.id },
         });
-        if (batchStudent?.batchId !== batchId) throw new Error("Student Does not belongs to this batch");
+        if (batchStudent?.batchId !== batchId)
+          throw new Error("Student Does not belongs to this batch");
       }
       const assessment = await prismaClient.assessment.findMany({
         where: { batchId: batchId as string },
@@ -207,7 +187,9 @@ class AssessmentController {
 
       return res
         .status(200)
-        .json(apiResponse(200, "Batch Assessment Fetched Successfully", assessment));
+        .json(
+          apiResponse(200, "Batch Assessment Fetched Successfully", assessment),
+        );
     } catch (error: any) {
       console.log(error);
       return res.status(200).json(apiResponse(200, error.message, null));
@@ -217,13 +199,6 @@ class AssessmentController {
     try {
       const assessmentId = req.params.id;
       if (!req.user) throw new Error("User not authenticated");
-      if (
-        req.user.type !== "SUPERADMIN" &&
-        req.user.type !== "ADMIN" &&
-        req.user.type !== "INSTITUTION" &&
-        req.user.type !== "VENDOR"
-      )
-        throw new Error("User Not Authorized to update Assessments");
 
       const assessment = await prismaClient.assessment.findUnique({
         where: { id: assessmentId as string },
@@ -245,10 +220,73 @@ class AssessmentController {
         },
       });
       if (!assessment) throw new Error("assessment not found");
-
+      if (assessment.status !== "LIVE")
+        throw new Error("wait for test to start");
       return res
         .status(200)
         .json(apiResponse(200, "Assessment Fetched Successfully", assessment));
+    } catch (error: any) {
+      console.log(error);
+      return res.status(200).json(apiResponse(200, error.message, null));
+    }
+  }
+  async getAssessmentByInstitution(req: Request, res: Response) {
+    try {
+      if (!req.user) throw new Error("user is not authenticated");
+      if (
+        req.user.type !== "SUPERADMIN" &&
+        req.user.type !== "ADMIN" &&
+        req.user.type !== "INSTITUTION" &&
+        req.user.type !== "VENDOR"
+      )
+        throw new Error("User Not Authorized to delete Assessments");
+
+      const instituteId = req.params.id;
+      const dbInstitute = await prismaClient.institution.findUnique({
+        where: {
+          id: instituteId as string,
+        },
+        select: {
+          batches: {
+            select: {
+              id: true,
+            },
+          },
+        },
+      });
+      if (!dbInstitute) throw new Error("no batch found");
+      const batchId = dbInstitute?.batches.map((batch) => {
+        return batch.id;
+      });
+      if (batchId.length === 0) {
+        return res
+          .status(200)
+          .json(apiResponse(200, "assessments fetched successfully", []));
+      }
+      const assessments = await prismaClient.assessment.findMany({
+        where: {
+          batchId: {
+            in: batchId,
+          },
+        },
+        select: {
+          id: true,
+          name: true,
+          description: true,
+          instruction: true,
+          startTime: true,
+          endTime: true,
+          individualSectionTimeLimit: true,
+          status: true,
+          batchId: true,
+        },
+      });
+
+      return res
+        .status(200)
+        .json(
+          apiResponse(200, "assessments fetched successfully", assessments),
+        );
     } catch (error: any) {
       console.log(error);
       return res.status(200).json(apiResponse(200, error.message, null));
@@ -260,12 +298,7 @@ class AssessmentController {
       if (!req.user) throw new Error("User not authenticated");
       const { status } = req.body;
       if (!status) throw new Error("Please provide all fields");
-      if (
-        req.user.type !== "SUPERADMIN" &&
-        req.user.type !== "ADMIN" &&
-        req.user.type !== "INSTITUTION" &&
-        req.user.type !== "VENDOR"
-      )
+      if (req.user.type === "STUDENT")
         throw new Error("User Not Authorized to update Assessments");
 
       const assessment = await prismaClient.assessment.findFirst({
@@ -332,6 +365,5 @@ class AssessmentController {
       return res.status(200).json(apiResponse(500, error.message, null));
     }
   }
-
 }
 export default new AssessmentController();

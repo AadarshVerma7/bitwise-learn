@@ -1,4 +1,5 @@
 import axiosInstance from "@/lib/axios";
+import toast from "react-hot-toast";
 
 type UpdateAssignmentQuestionPayload = {
   question?: string;
@@ -11,12 +12,16 @@ export const updateAssignmentQuestion = async (
   questionId: string,
   payload: UpdateAssignmentQuestionPayload,
 ) => {
-  if (!questionId) throw new Error("Question ID is required");
+  try {
+    if (!questionId) throw new Error("Question ID is required");
 
-  const res = await axiosInstance.put(
-    `/api/course/assignment-question/update/${questionId}`,
-    payload,
-  );
+    const res = await axiosInstance.put(
+      `/api/course/assignment-question/update/${questionId}`,
+      payload,
+    );
 
-  return res.data;
+    return res.data;
+  } catch (error: any) {
+    toast.error(error.message || "failed to update question");
+  }
 };

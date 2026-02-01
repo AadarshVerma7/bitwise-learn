@@ -1,6 +1,9 @@
 "use client";
 
-import { getAllAssessments } from "@/api/assessments/get-all-assessments";
+import {
+  getAllAssessments,
+  getAllInstituteAssessment,
+} from "@/api/assessments/get-all-assessments";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -11,7 +14,8 @@ import {
   CheckCircle,
 } from "lucide-react";
 import { useColors } from "@/component/general/(Color Manager)/useColors";
-
+import { useInstitution } from "@/store/institutionStore";
+import { useAdmin } from "@/store/adminStore";
 
 type Assessment = {
   id: string;
@@ -34,11 +38,20 @@ function AllAssessments() {
 
   const router = useRouter();
   const Colors = useColors();
-
+  const { info: adminInfo } = useAdmin();
+  const { info: instutionInfo } = useInstitution();
   useEffect(() => {
     async function handleLoad() {
       setLoading(true);
-      const data = await getAllAssessments();
+      let data;
+      if (adminInfo?.data.id) {
+        data = await getAllAssessments();
+      } else {
+        data = await getAllInstituteAssessment(
+          instutionInfo?.data.id as string,
+        );
+      }
+      console.log(data);
       setAssessments(data.data);
       setLoading(false);
     }
@@ -59,11 +72,15 @@ function AllAssessments() {
 
   return (
     <div className="space-y-4">
-      <div className={`flex flex-wrap items-center justify-between gap-3 rounded-lg p-4 ${Colors.background.primary} ${Colors.text.primary} ${Colors.border.defaultThin}`}>
+      <div
+        className={`flex flex-wrap items-center justify-between gap-3 rounded-lg p-4 ${Colors.background.primary} ${Colors.text.primary} ${Colors.border.defaultThin}`}
+      >
         <div className="flex items-center gap-3 flex-wrap">
           {/* Search */}
           <div className="relative">
-            <Search className={`absolute left-3 top-2.5 h-4 w-4 ${Colors.text.secondary}`} />
+            <Search
+              className={`absolute left-3 top-2.5 h-4 w-4 ${Colors.text.secondary}`}
+            />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -90,7 +107,9 @@ function AllAssessments() {
         </div>
 
         {/* Result Count */}
-        <div className={`flex items-center gap-2 text-sm ${Colors.text.secondary}`}>
+        <div
+          className={`flex items-center gap-2 text-sm ${Colors.text.secondary}`}
+        >
           <Filter className="h-4 w-4" />
           {filteredAssessments.length} results
         </div>
@@ -98,7 +117,9 @@ function AllAssessments() {
 
       <div className="w-full overflow-x-auto">
         <table className="w-full rounded-lg">
-          <thead className={`${Colors.background.primary} ${Colors.border.defaultThick}`}>
+          <thead
+            className={`${Colors.background.primary} ${Colors.border.defaultThick}`}
+          >
             <tr className={`text-left text-sm ${Colors.text.secondary}`}>
               <th className="px-4 py-3">Name</th>
               <th className="px-4 py-3">Description</th>
@@ -118,7 +139,10 @@ function AllAssessments() {
                   className="border-b border-neutral-800 animate-pulse"
                 >
                   {Array.from({ length: 7 }).map((_, j) => (
-                    <td key={j} className={`px-4 py-4 ${Colors.text.secondary}`}>
+                    <td
+                      key={j}
+                      className={`px-4 py-4 ${Colors.text.secondary}`}
+                    >
                       <div className="h-4 w-full rounded bg-neutral-700/60" />
                     </td>
                   ))}
@@ -131,11 +155,15 @@ function AllAssessments() {
                   key={assessment.id}
                   className={`border-b border-neutral-800 text-sm ${Colors.hover.special} transition ${Colors.background.secondary} `}
                 >
-                  <td className={`px-4 py-3 font-medium ${Colors.text.primary}`}>
+                  <td
+                    className={`px-4 py-3 font-medium ${Colors.text.primary}`}
+                  >
                     {assessment.name}
                   </td>
 
-                  <td className={`px-4 py-3 ${Colors.text.secondary} line-clamp-2`}>
+                  <td
+                    className={`px-4 py-3 ${Colors.text.secondary} line-clamp-2`}
+                  >
                     {assessment.description}
                   </td>
 
@@ -185,7 +213,9 @@ function AllAssessments() {
                     )}
                   </td>
 
-                  <td className={`px-4 py-3 text-right ${Colors.text.secondary}`}>
+                  <td
+                    className={`px-4 py-3 text-right ${Colors.text.secondary}`}
+                  >
                     {assessment.status === "ENDED" && (
                       <button
                         onClick={() =>
@@ -193,7 +223,7 @@ function AllAssessments() {
                             `/admin-dashboard/reports/assessment/${assessment.id}`,
                           )
                         }
-                      className={`px-3 py-1.5 text-xs font-medium rounded-md cursor-pointer
+                        className={`px-3 py-1.5 text-xs font-medium rounded-md cursor-pointer
                                  ${Colors.border.specialThin} ${Colors.hover.special}  ${Colors.text.special} transition`}
                       >
                         View

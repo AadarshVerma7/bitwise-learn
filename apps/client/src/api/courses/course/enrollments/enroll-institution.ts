@@ -1,11 +1,17 @@
 import axiosInstance from "@/lib/axios";
+import toast from "react-hot-toast";
 
 export async function enrollInstitutionCourses(data: {
   batchId: string;
   courses: string[];
 }) {
-  const result = await axiosInstance.post(
-    "/api/course/create-enrollment",
-    data,
-  );
+  try {
+    const result = await axiosInstance.post(
+      "/api/course/create-enrollment",
+      data,
+    );
+    toast.success("enrolled");
+  } catch (error) {
+    toast.error("failed to enroll");
+  }
 }

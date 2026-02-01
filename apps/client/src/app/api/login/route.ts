@@ -40,7 +40,6 @@ export async function POST(req: NextRequest) {
 
     const roleToken = createJWT({ role: data.role });
 
-
     (await cookies()).set("role", roleToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -50,8 +49,8 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(response.data.data, { status: 200 });
   } catch (error: any) {
-    console.error("Error loggin in :", error.message);
-    console.log(error);
+    console.dir("Error loggin in :", error.message);
+    console.dir(error);
 
     return NextResponse.json({ error: "Failed loggin in " }, { status: 500 });
   }
