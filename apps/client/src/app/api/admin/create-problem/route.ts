@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
       },
       withCredentials: true,
     });
-    console.log(response);
+    // console.log(response);
     return NextResponse.json({
       success: true,
       data: response.data,

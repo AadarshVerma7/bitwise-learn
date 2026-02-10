@@ -67,21 +67,23 @@ export const EntityList = ({ type, batchId }: EntityListProps) => {
 
   const handleDelete = async () => {
     try {
+      // console.log(selectedEntity);
       const res = await deleteEntity(
         selectedEntity.id || selectedEntity._id,
         { data: "", entity: ENTITY_URL_MAP[type] },
         null,
       );
+
       setShowDeleteConfirm(false);
       setSelectedEntity(null);
       window.location.reload();
     } catch (error) {
-      // console.error("Delete failed", error);
+      console.error("Delete failed", error);
     }
     setShowDeleteConfirm(false);
     setSelectedEntity(null);
   };
-
+  // console.log("out of delete func");
   useEffect(() => {
     setLoading(true);
     const fetchData = async () => {
@@ -318,15 +320,13 @@ export const EntityList = ({ type, batchId }: EntityListProps) => {
                       {cells.map((cell, index) => (
                         <td
                           key={index}
-                          className={`px-6 py-4 ${
-                            index === 0 ? "font-medium" : ""
-                          } ${
-                            index === cells.length - 1
+                          className={`px-6 py-4 ${index === 0 ? "font-medium" : ""
+                            } ${index === cells.length - 1
                               ? `${Colors.text.secondary}`
                               : index === 0
                                 ? ""
                                 : `${Colors.text.secondary} truncate`
-                          }`}
+                            }`}
                         >
                           {cell}
                         </td>
@@ -385,8 +385,8 @@ export const EntityList = ({ type, batchId }: EntityListProps) => {
                       onClick={async () => {
                         try {
                           handleSave()
-                            .then(() => {})
-                            .catch(() => {});
+                            .then(() => { })
+                            .catch(() => { });
                           setSelectedEntity(editedEntity);
                           setIsEditing(false);
                           setEditedEntity(null);

@@ -23,7 +23,7 @@ const getUrl = (id: string, entity: string, operation: string) => {
       url = `/api/admin/admins/${id}/${operation}`;
       break;
     case "courses":
-      url = `/api/admin/admins/${id}/${operation}`;
+      url = `/api/course/enrollments/${id}/${operation}`;
       break;
   }
   return url;
@@ -31,7 +31,6 @@ const getUrl = (id: string, entity: string, operation: string) => {
 export const updateEntity = async (id: string, data: any, stateFn: any) => {
   const toastId = toast.loading("Saving Changes...");
   try {
-    console.log(getUrl(id, data.entity, "update"));
     const updatedData = await axiosInstance.post(
       getUrl(id, data.entity, "update"),
       data,
@@ -48,7 +47,7 @@ export const deleteEntity = async (id: string, data: any, stateFn: any) => {
   // console.log("hello inside the function");
   const toastId = toast.loading("Deleting...");
   try {
-    const deleteData = await axiosInstance.post(
+    const deleteData = await axiosInstance.delete(
       getUrl(id, data.entity, "delete"),
       data,
     );

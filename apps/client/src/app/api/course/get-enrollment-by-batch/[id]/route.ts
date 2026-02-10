@@ -21,9 +21,8 @@ export async function GET(
         credentials: "include",
       },
     );
-
     const data = await res.json();
-
+    // console.log(data);
     return NextResponse.json(data, { status: res.status });
   } catch (error: any) {
     return NextResponse.json({ message: error.message }, { status: 500 });

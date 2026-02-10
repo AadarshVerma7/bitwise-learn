@@ -8,7 +8,7 @@ export async function allBatchCourses(batchId: string) {
     );
     let dataMap = result.data.data;
     dataMap = result.data.data.map((course: any) => {
-      return course.course;
+      return { ...course.course, id: course.id };
     });
 
     return dataMap;

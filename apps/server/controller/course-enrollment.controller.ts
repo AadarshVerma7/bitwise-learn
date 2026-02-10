@@ -15,6 +15,7 @@ class CourseEnrollment {
       const getEnrollment = await prismaClient.courseEnrollment.findMany({
         where: { courseId: dbCourse.id },
         select: {
+          id: true,
           institution: {
             select: {
               name: true,
@@ -54,6 +55,7 @@ class CourseEnrollment {
       const getEnrollment = await prismaClient.courseEnrollment.findMany({
         where: { batchId: dbBatch.id },
         select: {
+          id: true,
           course: true,
         },
       });
@@ -121,6 +123,7 @@ class CourseEnrollment {
   async removeEnrollment(req: Request, res: Response) {
     try {
       const enrollmentId = req.params.id;
+      console.log("ENrollment id is: ", enrollmentId);
       const userId = req.user?.id;
 
       if (!enrollmentId) throw new Error("enrollmentId is required");
@@ -128,10 +131,10 @@ class CourseEnrollment {
 
       const dbEnrollement = await prismaClient.courseEnrollment.findUnique({
         where: {
-          id: enrollmentId as string,
+          id: enrollmentId,
         },
       });
-
+      console.log("DB ENROLLMENT IS", dbEnrollement);
       if (!dbEnrollement) throw new Error("dbEnrollement doesn't exist");
 
       const removedEnrollment = await prismaClient.courseEnrollment.delete({
