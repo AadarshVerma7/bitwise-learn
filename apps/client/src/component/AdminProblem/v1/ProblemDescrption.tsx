@@ -27,7 +27,8 @@ function ProblemDescrption({
   const isResizing = useRef(false);
   const Colors = useColors();
   useEffect(() => {
-    if (role && role < 2) {
+    if (role === null) return;
+    if (role < 4) {
       setShowButton(true);
     } else {
       setShowButton(false);
