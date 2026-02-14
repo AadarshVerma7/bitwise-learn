@@ -30,7 +30,6 @@ export async function POST(req: NextRequest) {
       `${backendUrl}/api/v1/auth` + URL_MAP[data.role],
       { email: data.email, password: data.password },
     );
-    console.log(response.data);
     (await cookies()).set("token", response.data.data.tokens.accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
